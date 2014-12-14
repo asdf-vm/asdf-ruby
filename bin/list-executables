@@ -1,0 +1,3 @@
+#!/usr/bin/env
+
+echo "bin/ct_run bin/epmd bin/erlc bin/run_erl bin/typer bin/dialyzer bin/erl bin/escript bin/to_erl"

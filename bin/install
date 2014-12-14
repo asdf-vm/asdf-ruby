@@ -18,7 +18,7 @@ install_erlang() {
     then
       ./otp_build autoconf || exit 1
     fi
-    ./configure --prefix=$install_path || exit 1
+    ./configure --prefix=$install_path "${@:3}" || exit 1
     make || exit 1
     make install || exit 1
   )
