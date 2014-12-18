@@ -1,6 +1,7 @@
 #!/usr/bin/env sh
 
-versions=(
+versions_list=(
+  17.4
   17.3
   17.1
   17.0
@@ -16,7 +17,11 @@ versions=(
   R15B
 )
 
-for version in "${versions[@]}"
+versions=""
+
+for version in "${versions_list[@]}"
 do
-  echo $version
+  versions="${versions} ${version}"
 done
+
+echo $versions
