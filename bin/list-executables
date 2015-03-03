@@ -1,17 +1,14 @@
 #!/usr/bin/env sh
 
 executables_list=(
-  ct_run
-  epmd
-  erlc
-  run_erl
-  typer
-  dialyzer
-  erl
-  escript
-  to_erl
+  erb
+  gem
+  irb
+  rake
+  rdoc
+  ri
+  ruby
 )
-
 
 executables=""
 
