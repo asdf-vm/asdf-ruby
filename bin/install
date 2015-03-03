@@ -14,8 +14,7 @@ install_ruby() {
     cd $(dirname $source_path)
     tar zxf $source_path || exit 1
     cd $(untar_path $install_type $version)
-    autoconf
-    ./configure --prefix=$install_path "${@:3}" || exit 1
+    ./configure --prefix=$install_path || exit 1
     make || exit 1
     make install || exit 1
   )
