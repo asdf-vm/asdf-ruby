@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-install_erlang() {
+install_ruby() {
   local install_type=$1
   local version=$2
   local install_path=$3
@@ -14,27 +14,11 @@ install_erlang() {
     cd $(dirname $source_path)
     tar zxf $source_path || exit 1
     cd $(untar_path $install_type $version)
-    if [ "$install_type" != "version" ]
-    then
-      ./otp_build autoconf || exit 1
-    fi
+    autoconf
     ./configure --prefix=$install_path "${@:3}" || exit 1
     make || exit 1
     make install || exit 1
   )
-}
-
-
-untar_path() {
-  local install_type=$1
-  local version=$2
-
-  if [ "$install_type" = "version" ]
-  then
-    echo "$TMPDIR/otp_src_${version}"
-  else
-    echo "$TMPDIR/otp-${version}"
-  fi
 }
 
 
@@ -51,9 +35,36 @@ download_source() {
 get_download_file_path() {
   local install_type=$1
   local version=$2
-  local pkg_name="otp-${install_type}-${version}-src.tar.gz"
+
+  local ruby_type=$(get_ruby_type $version)
+  local ruby_version=$(get_ruby_version $version)
+
+  if [ "${ruby_type}" = "ruby" ]; then
+    local pkg_name="ruby-${ruby_version}.tar.gz"
+  elif [ "${ruby_type}" = "jruby" ]; then
+    echo "TODO FOR JRUBY"
+    echo "TODO FOR JRUBY"
+  fi
 
   echo "$TMPDIR$pkg_name"
+}
+
+
+untar_path() {
+  local install_type=$1
+  local version=$2
+
+  local ruby_type=$(get_ruby_type $version)
+  local ruby_version=$(get_ruby_version $version)
+
+  if [ "${ruby_type}" = "ruby" ]; then
+    local dir_name="ruby-${ruby_version}"
+  elif [ "${ruby_type}" = "jruby" ]; then
+    echo "TODO FOR JRUBY"
+    echo "TODO FOR JRUBY"
+  fi
+
+  echo "$TMPDIR$dir_name"
 }
 
 
@@ -61,13 +72,52 @@ get_download_url() {
   local install_type=$1
   local version=$2
 
-  if [ "$install_type" = "version" ]
-  then
-    echo "http://www.erlang.org/download/otp_src_${version}.tar.gz"
-  else
-    echo "https://github.com/erlang/otp/archive/${version}.tar.gz"
+  local ruby_type=$(get_ruby_type $version)
+  local ruby_version=$(get_ruby_version $version)
+
+  if [ "${ruby_type}" = "ruby" ]; then
+    local ruby_base_version=$(get_ruby_base_version $ruby_version)
+    echo "http://cache.ruby-lang.org/pub/ruby/${ruby_base_version}/ruby-${ruby_version}.tar.gz"
+  elif [ "${ruby_type}" = "jruby" ]; then
+    echo "TODO FOR JRUBY"
+    echo "TODO FOR JRUBY"
   fi
 }
 
 
-install_erlang $@
+get_ruby_base_version() {
+  IFS='-' read -a version_info <<< "$1"
+  IFS='.' read -a version <<< "${version_info[0]}"
+
+  echo "${version[0]}.${version[1]}"
+}
+
+
+get_ruby_version() {
+  IFS='-' read -a version_info <<< "$1"
+
+  if [ "${version_info[0]}" = "jruby" ]; then
+    # jruby
+    echo "${version_info[1]}-${version_info[2]}"
+  else
+    # ruby
+    if [ "${#version_info[@]}" -eq 1 ]; then
+      echo "${version_info[0]}"
+    else
+      echo "${version_info[0]}-${version_info[1]}"
+    fi
+  fi
+}
+
+
+get_ruby_type() {
+  IFS='-' read -a version_info <<< "$1"
+  if [ "${version_info[0]}" = "jruby" ]; then
+    echo "jruby"
+  else
+    echo "ruby"
+  fi
+}
+
+
+install_ruby $@

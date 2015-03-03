@@ -1,20 +1,9 @@
 #!/usr/bin/env sh
 
 versions_list=(
-  17.4
-  17.3
-  17.1
-  17.0
-  R16B03-1
-  R16B03
-  R16B02
-  R16B01
-  R16B
-  R16A
-  R15B03-1
-  R15B02
-  R15B01
-  R15B
+  2.2.0
+  2.1.5
+  1.9.3-p551
 )
 
 versions=""
