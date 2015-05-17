@@ -29,7 +29,7 @@ os_based_configure_options() {
   local configure_options=""
 
   if [[ "$operating_system" =~ "Darwin" ]]; then
-    if [ "$ASDF_OPENSSL_PATH" = "" ]]; then
+    if [ "$ASDF_OPENSSL_PATH" = "" ]; then
       local openssl_path=$(brew --prefix openssl 2>/dev/null)
     else
       local openssl_path=$ASDF_OPENSSL_PATH
