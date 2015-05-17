@@ -5,7 +5,7 @@ Ruby plugin for [asdf](https://github.com/HashNuke/asdf) version manager
 ## Install
 
 ```
-asdf source-add ruby https://github.com/HashNuke/asdf-ruby.git
+asdf plugin-add ruby https://github.com/HashNuke/asdf-ruby.git
 ```
 
 ## Use
