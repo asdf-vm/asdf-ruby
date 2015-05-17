@@ -1,6 +1,6 @@
 # asdf-ruby
 
-Ruby package source for [asdf](https://github.com/HashNuke/asdf) version manager
+Ruby plugin for [asdf](https://github.com/HashNuke/asdf) version manager
 
 ## Install
 
