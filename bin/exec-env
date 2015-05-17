@@ -1,6 +1,6 @@
-echo "asdf rubygems plugin"
 if [ "$RUBYLIB" = "" ]; then
   RUBYLIB="$(dirname $(dirname $0))/rubygems-plugin"
 else
   RUBYLIB="$(dirname $(dirname $0))/rubygems-plugin:$RUBYLIB"
 fi
+echo RUBYLIB=$RUBYLIB
