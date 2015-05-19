@@ -66,7 +66,7 @@ homebrew_package_path() {
   if [ "$(brew ls --versions $package_name)" = "" ]; then
     echo ""
   else
-    echo "$(brew --prefix openssl)"
+    echo "$(brew --prefix $package_name)"
   fi
 }
 
@@ -117,7 +117,6 @@ download_source() {
   local download_path=$3
   local download_url=$(get_download_url $install_type $version)
 
-  echo $download_path
   curl -Lo $download_path -C - $download_url
 }
 
