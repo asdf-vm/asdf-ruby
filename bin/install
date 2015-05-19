@@ -38,7 +38,7 @@ install_ruby() {
       fi
       unset ASDF_PKG_MISSING #set in os_based_configure_options
     else
-      local configure_options="$RUBY_CONFIGURE_OPTIONS"
+      local configure_options="$RUBY_CONFIGURE_OPTIONS --prefix=$install_path"
     fi
 
     echo "Building with options: $configure_options"
