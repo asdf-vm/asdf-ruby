@@ -44,7 +44,7 @@ install_ruby() {
 homebrew_package_path() {
   local package_name=$1
 
-  if ["$(brew ls --versions $package_name)" = ""]; then
+  if [ "$(brew ls --versions $package_name)" = "" ]; then
     echo ""
   else
     echo "$(brew --prefix openssl)"
@@ -53,7 +53,7 @@ homebrew_package_path() {
 
 
 exit_if_homebrew_not_installed() {
-  if [ "$(brew --version 2>/dev/null)" = ""]; then
+  if [ "$(brew --version 2>/dev/null)" = "" ]; then
     echo "ERROR: Please install homebrew for OSX"
     exit 1
   fi
