@@ -106,7 +106,7 @@ os_based_configure_options() {
     configure_options="$configure_options --with-libyaml-dir=$libyaml_path"
   fi
 
-  configure_options="$configure_options --enable-shared"
+  configure_options="$configure_options --enable-shared --disable-install-doc"
   echo $configure_options
 }
 
