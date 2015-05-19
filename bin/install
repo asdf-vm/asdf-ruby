@@ -31,10 +31,12 @@ install_ruby() {
     if [ "$ASDF_PKG_MISSING" != "" ]; then
       echo "WARNING: Might use OS-provided pkgs for the following: $ASDF_PKG_MISSING"
     fi
+    unset ASDF_PKG_MISSING #set in os_based_configure_options
 
-    echo "$configure_options"
+    echo "Building with options: $configure_options"
 
     ./configure $configure_options || exit 1
+
     make || exit 1
     make install || exit 1
   )
@@ -80,25 +82,25 @@ os_based_configure_options() {
   fi
 
   if [ "$openssl_path" = "" ]; then
-    ASDF_PKG_MISSING="openssl"
+    export ASDF_PKG_MISSING="openssl"
   else
     configure_options="--with-openssl-dir=$openssl_path"
   fi
 
   if [ "$libyaml_path" = "" ]; then
-    ASDF_PKG_MISSING="$ASDF_PKG_MISSING libyaml"
+    export ASDF_PKG_MISSING="$ASDF_PKG_MISSING libyaml"
   else
     configure_options="$configure_options --with-libyaml-dir=$libyaml_path"
   fi
 
   if [ "$readline_path" = "" ]; then
-    ASDF_PKG_MISSING="$ASDF_PKG_MISSING readline"
+    export ASDF_PKG_MISSING="$ASDF_PKG_MISSING readline"
   else
     configure_options="$configure_options --with-readline-dir=$readline_path"
   fi
 
   if [ "$libffi_path" = "" ]; then
-    ASDF_PKG_MISSING="$ASDF_PKG_MISSING libffi"
+    export ASDF_PKG_MISSING="$ASDF_PKG_MISSING libffi"
   fi
   configure_options="$configure_options --enable-sharing"
 
