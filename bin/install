@@ -4,18 +4,35 @@ install_ruby() {
   local install_type=$1
   local version=$2
   local install_path=$3
-  local source_path=$(get_download_file_path $install_type $version)
 
-  download_source $install_type $version
+  if [ "$TMPDIR" = "" ]; then
+    local tmp_download_dir=$(mktemp -d)
+  else
+    local tmp_download_dir=$TMPDIR
+  fi
+
+  # path to the tar file
+  local source_path=$(get_download_file_path $install_type $version $tmp_download_dir)
+
+  download_source $install_type $version $source_path
 
   # running this in a subshell
   # because we don't want to disturb current working dir
   (
     cd $(dirname $source_path)
     tar zxf $source_path || exit 1
-    cd $(untar_path $install_type $version)
+
+    # we use untar path because the extracted dir maybe diff
+    # ideally should be using tar with --strip-components 1
+    cd $(untar_path $install_type $version $tmp_download_dir)
 
     local configure_options="$(os_based_configure_options) --prefix=$install_path"
+
+    if [ "$ASDF_PKG_MISSING" != "" ]; then
+      echo "WARNING: Might use OS-provided pkgs for the following: $ASDF_PKG_MISSING"
+    fi
+
+    echo "$configure_options"
 
     ./configure $configure_options || exit 1
     make || exit 1
@@ -24,43 +41,67 @@ install_ruby() {
 }
 
 
+homebrew_package_path() {
+  local package_name=$1
+
+  if ["$(brew ls --versions $package_name)" = ""]; then
+    echo ""
+  else
+    echo "$(brew --prefix openssl)"
+  fi
+}
+
+
+exit_if_homebrew_not_installed() {
+  if [ "$(brew --version 2>/dev/null)" = ""]; then
+    echo "ERROR: Please install homebrew for OSX"
+    exit 1
+  fi
+}
+
+
 os_based_configure_options() {
   local operating_system=$(uname -a)
   local configure_options=""
 
   if [[ "$operating_system" =~ "Darwin" ]]; then
-    if [ "$ASDF_OPENSSL_PATH" = "" ]; then
-      local openssl_path=$(brew --prefix openssl 2>/dev/null)
-    else
-      local openssl_path=$ASDF_OPENSSL_PATH
-    fi
 
-    local readline_path=$(brew --prefix readline 2>/dev/null)
-    local libyaml_path=$(brew --prefix libyaml 2>/dev/null)
+    exit_if_homebrew_not_installed
+
+    local openssl_path=$(homebrew_package_path openssl)
+    local readline_path=$(homebrew_package_path readline)
+    local libyaml_path=$(homebrew_package_path libyaml)
+    local libffi_path=$(homebrew_package_path libffi)
   else
     local openssl_path=/usr
-    local openssl_path=/usr
+    local readline_path=/usr
     local libyaml_path=/usr
+    local libffi_path=/usr
   fi
 
-
   if [ "$openssl_path" = "" ]; then
-    echo "WARNING: you don't have openssl installed"
+    ASDF_PKG_MISSING="openssl"
   else
     configure_options="--with-openssl-dir=$openssl_path"
   fi
 
   if [ "$libyaml_path" = "" ]; then
-    echo "WARNING: you don't have libyaml installed"
+    ASDF_PKG_MISSING="$ASDF_PKG_MISSING libyaml"
   else
     configure_options="$configure_options --with-libyaml-dir=$libyaml_path"
   fi
 
   if [ "$readline_path" = "" ]; then
-    echo "WARNING: you don't have readline installed"
+    ASDF_PKG_MISSING="$ASDF_PKG_MISSING readline"
   else
     configure_options="$configure_options --with-readline-dir=$readline_path"
   fi
+
+  if [ "$libffi_path" = "" ]; then
+    ASDF_PKG_MISSING="$ASDF_PKG_MISSING libffi"
+  fi
+  configure_options="$configure_options --enable-sharing"
+
 
   echo $configure_options
 }
@@ -69,9 +110,10 @@ os_based_configure_options() {
 download_source() {
   local install_type=$1
   local version=$2
-  local download_path=$(get_download_file_path $install_type $version)
+  local download_path=$3
   local download_url=$(get_download_url $install_type $version)
 
+  echo $download_path
   curl -Lo $download_path -C - $download_url
 }
 
@@ -79,36 +121,37 @@ download_source() {
 get_download_file_path() {
   local install_type=$1
   local version=$2
+  local tmp_download_dir=$3
 
   local ruby_type=$(get_ruby_type $version)
   local ruby_version=$(get_ruby_version $version)
 
   if [ "${ruby_type}" = "ruby" ]; then
     local pkg_name="ruby-${ruby_version}.tar.gz"
-  elif [ "${ruby_type}" = "jruby" ]; then
-    echo "TODO FOR JRUBY"
-    echo "TODO FOR JRUBY"
   fi
+  # TODO for jruby
+  # elif [ "${ruby_type}" = "jruby" ]; then
 
-  echo "$TMPDIR$pkg_name"
+  echo "$tmp_download_dir/$pkg_name"
 }
 
 
 untar_path() {
   local install_type=$1
   local version=$2
+  local tmp_download_dir=$3
 
   local ruby_type=$(get_ruby_type $version)
   local ruby_version=$(get_ruby_version $version)
 
   if [ "${ruby_type}" = "ruby" ]; then
     local dir_name="ruby-${ruby_version}"
-  elif [ "${ruby_type}" = "jruby" ]; then
-    echo "TODO FOR JRUBY"
-    echo "TODO FOR JRUBY"
   fi
 
-  echo "$TMPDIR$dir_name"
+  # TODO for jruby
+  # elif [ "${ruby_type}" = "jruby" ]; then
+
+  echo "$tmp_download_dir/$dir_name"
 }
 
 
@@ -122,10 +165,10 @@ get_download_url() {
   if [ "${ruby_type}" = "ruby" ]; then
     local ruby_base_version=$(get_ruby_base_version $ruby_version)
     echo "http://cache.ruby-lang.org/pub/ruby/${ruby_base_version}/ruby-${ruby_version}.tar.gz"
-  elif [ "${ruby_type}" = "jruby" ]; then
-    echo "TODO FOR JRUBY"
-    echo "TODO FOR JRUBY"
   fi
+
+  # TODO for jruby
+  # elif [ "${ruby_type}" = "jruby" ]; then
 }
 
 
