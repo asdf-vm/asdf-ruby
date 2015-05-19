@@ -26,15 +26,22 @@ install_ruby() {
     # ideally should be using tar with --strip-components 1
     cd $(untar_path $install_type $version $tmp_download_dir)
 
-    local configure_options="$(os_based_configure_options) --prefix=$install_path"
+    if [ "$RUBY_CONFIGURE_OPTIONS" = "" ]; then
+      local configure_options="$(os_based_configure_options) --prefix=$install_path"
 
-    if [ "$ASDF_PKG_MISSING" != "" ]; then
-      echo "WARNING: Might use OS-provided pkgs for the following: $ASDF_PKG_MISSING"
+      if [ "$RUBY_EXTRA_CONFIGURE_OPTIONS" != "" ]; then
+        configure_options="$configure_options $RUBY_EXTRA_CONFIGURE_OPTIONS"
+      fi
+
+      if [ "$ASDF_PKG_MISSING" != "" ]; then
+        echo "WARNING: Might use OS-provided pkgs for the following: $ASDF_PKG_MISSING"
+      fi
+      unset ASDF_PKG_MISSING #set in os_based_configure_options
+    else
+      local configure_options="$RUBY_CONFIGURE_OPTIONS"
     fi
-    unset ASDF_PKG_MISSING #set in os_based_configure_options
 
     echo "Building with options: $configure_options"
-
     ./configure $configure_options || exit 1
 
     make || exit 1
