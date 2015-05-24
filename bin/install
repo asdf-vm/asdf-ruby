@@ -31,7 +31,7 @@ install_ruby() {
       echo "WARNING: Might use OS-provided pkgs for the following: $ASDF_PKG_MISSING"
     fi
 
-    local configure_options="$(construct_configure_options)"
+    local configure_options="$(construct_configure_options $install_path)"
     # set in os_based_configure_options
     # we unset it here because echo-ing changes the return value of the function
     unset ASDF_PKG_MISSING
@@ -46,6 +46,8 @@ install_ruby() {
 
 
 construct_configure_options() {
+  local install_path=$1
+
   if [ "$RUBY_CONFIGURE_OPTIONS" = "" ]; then
     local configure_options="$(os_based_configure_options) --prefix=$install_path"
 
