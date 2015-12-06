@@ -91,6 +91,7 @@ os_based_configure_options() {
 
     local openssl_path=$(homebrew_package_path openssl)
     local libyaml_path=$(homebrew_package_path libyaml)
+    local readline_path=$(homebrew_package_path readline)
   else
     local openssl_path=/usr
     local libyaml_path=/usr
@@ -106,6 +107,10 @@ os_based_configure_options() {
     export ASDF_PKG_MISSING="$ASDF_PKG_MISSING libyaml"
   else
     configure_options="$configure_options --with-libyaml-dir=$libyaml_path"
+  fi
+
+  if [ "$readline_path" != "" ]; then
+    configure_options="$configure_options --with-readline-dir=$readline_path"
   fi
 
   configure_options="$configure_options --enable-shared --disable-install-doc"
