@@ -1,16 +1,16 @@
 # asdf-ruby
 
-Ruby plugin for [asdf](https://github.com/HashNuke/asdf) version manager
+Ruby plugin for [asdf](https://github.com/asdf-vm/asdf) version manager
 
 ## Install
 
 ```
-asdf plugin-add ruby https://github.com/HashNuke/asdf-ruby.git
+asdf plugin-add ruby https://github.com/asdf-vm/asdf-ruby.git
 ```
 
 ## Use
 
-Check [asdf](https://github.com/HashNuke/asdf) readme for instructions on how to install & manage versions of Ruby.
+Check [asdf](https://github.com/asdf-vm/asdf) readme for instructions on how to install & manage versions of Ruby.
 
 When installing Ruby using `asdf install`, you can pass custom configure options with the following env vars:
 
