@@ -7,7 +7,7 @@ install_ruby() {
   local ruby_type=$(get_ruby_type $version)
 
   if [ "$TMPDIR" = "" ]; then
-    local tmp_download_dir=$(mktemp -d)
+    local tmp_download_dir=$(mktemp -d -t ruby_build_XXXXXX)
   else
     local tmp_download_dir=$TMPDIR
   fi
