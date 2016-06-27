@@ -1,5 +1,7 @@
 # asdf-ruby
 
+[![Build Status](https://travis-ci.org/asdf-vm/asdf-ruby.svg?branch=master)](https://travis-ci.org/asdf-vm/asdf-ruby)
+
 Ruby plugin for [asdf](https://github.com/asdf-vm/asdf) version manager
 
 ## Install
