@@ -4,12 +4,19 @@ install_ruby() {
   local install_type=$1
   local version=$2
   local install_path=$3
+  local source_compile_path=$4
   local ruby_type=$(get_ruby_type $version)
+
 
   if [ "$TMPDIR" = "" ]; then
     local tmp_download_dir=$(mktemp -d)
   else
     local tmp_download_dir=$TMPDIR
+  fi
+
+
+  if [ "$source_compile_path" = "" ]; then
+    source_compile_path=$(untar_path $install_type $version $tmp_download_dir)
   fi
 
   # path to the tar file
@@ -24,13 +31,13 @@ install_ruby() {
     if [ "${ruby_type}" = "jruby" ]; then
       tar zxf $source_path -C $(dirname $install_path) || exit 1
       exit 0
-    else
-      tar zxf $source_path || exit 1
     fi
+
+    tar zxf $source_path -C $source_compile_path --strip-components=1 || exit 1
 
     # we use untar path because the extracted dir maybe diff
     # ideally should be using tar with --strip-components 1
-    cd $(untar_path $install_type $version $tmp_download_dir)
+    cd $source_compile_path
 
     if [ "$ASDF_PKG_MISSING" != "" ]; then
       echo "WARNING: Might use OS-provided pkgs for the following: $ASDF_PKG_MISSING"
@@ -228,4 +235,4 @@ get_ruby_type() {
 }
 
 
-install_ruby $ASDF_INSTALL_TYPE $ASDF_INSTALL_VERSION $ASDF_INSTALL_PATH
+install_ruby $ASDF_INSTALL_TYPE $ASDF_INSTALL_VERSION $ASDF_INSTALL_PATH $ASDF_SOURCE_COMPILE_PATH
