@@ -24,7 +24,7 @@ When installing Ruby using `asdf install`, you can pass custom configure options
 ### `.ruby-version` file
 
 asdf uses the `.tool-versions` for auto-switching between software versions.
-To ease migration, you can you have it read an existing `.ruby-version` file to
+To ease migration, you can have it read an existing `.ruby-version` file to
 find out what version of Ruby should be used. To do this, add the following to
 `$HOME/.asdfrc`:
 
