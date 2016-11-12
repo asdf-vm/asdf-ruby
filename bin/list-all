@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 ruby_versions=$(
-  curl --silent -H "Content-Type:text/html" "http://cache.ruby-lang.org/pub/ruby/" \
+  curl --silent --compressed "http://cache.ruby-lang.org/pub/ruby/" \
     | sed -n -E 's/^.*"(ruby-)(.*).tar.gz".*$/\2/p' \
     | sort \
     | uniq
