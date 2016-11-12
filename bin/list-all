@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+LC_CTYPE=C
+LANG=C
+
 ruby_versions=$(
   curl --silent "http://cache.ruby-lang.org/pub/ruby/" \
     | sed -n -E 's/^.*"(ruby-)(.*).tar.gz".*$/\2/p' \
