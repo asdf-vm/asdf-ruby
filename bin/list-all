@@ -1,23 +1,17 @@
 #!/usr/bin/env bash
 
-versions_list=(
-  jruby-9.0.4.0
-  1.9.3-p551
-  2.1.4
-  2.1.5
-  2.1.6
-  2.1.7
-  2.2.0
-  2.2.1
-  2.2.2
-  2.2.3
-  2.3.0
-  2.3.1
+ruby_versions=$(
+  curl --silent "http://cache.ruby-lang.org/pub/ruby/" \
+    | sed -n -E 's/^.*"(ruby-)(.*).tar.gz".*$/\2/p' \
+    | sort \
+    | uniq
 )
 
-versions=""
+jruby_versions=(
+  jruby-9.0.4.0
+)
 
-for version in "${versions_list[@]}"
+for version in "${ruby_versions[@]} ${jruby_versions[@]}"
 do
   versions="${versions} ${version}"
 done
