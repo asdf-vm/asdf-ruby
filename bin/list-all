@@ -1,16 +1,27 @@
 #!/usr/bin/env bash
 
+RUBY_VERSIONS_URL=https://raw.githubusercontent.com/postmodern/ruby-versions/master/ruby/versions.txt
+JRUBY_VERSIONS_URL=https://raw.githubusercontent.com/postmodern/ruby-versions/master/jruby/versions.txt
+
+function get_versions() {
+  curl --silent $1
+}
+
 ruby_versions=$(
-  curl --silent --compressed "http://cache.ruby-lang.org/pub/ruby/" \
-    | sed -n -E 's/^.*"(ruby-)(.*).tar.gz".*$/\2/p' \
-    | uniq
+  get_versions $RUBY_VERSIONS_URL
+)
+jruby_versions=$(
+  get_versions $JRUBY_VERSIONS_URL
 )
 
-jruby_versions=(
-  jruby-9.0.4.0
-)
+versions=""
 
-for version in "${ruby_versions[@]} ${jruby_versions[@]}"
+for version in ${jruby_versions[@]}
+do
+  versions="${versions} jruby-${version}"
+done
+
+for version in ${ruby_versions[@]}
 do
   versions="${versions} ${version}"
 done
