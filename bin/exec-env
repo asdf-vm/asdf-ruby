@@ -8,3 +8,5 @@ if [ "$RUBYLIB" = "" ]; then
 else
   export RUBYLIB="$ruby_plugin_dir/rubygems-plugin:$RUBYLIB"
 fi
+
+export PATH=$install_path/bin:$PATH
