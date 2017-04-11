@@ -181,7 +181,7 @@ get_download_url() {
   local ruby_version=$(get_ruby_version $version)
 
   if [ "${ruby_type}" = "ruby" ]; then
-    echo "http://cache.ruby-lang.org/pub/ruby/ruby-${ruby_version}.tar.gz"
+    echo "https://cache.ruby-lang.org/pub/ruby/ruby-${ruby_version}.tar.gz"
   elif [ "${ruby_type}" = "jruby" ]; then
     echo "https://s3.amazonaws.com/jruby.org/downloads/${ruby_version}/jruby-bin-${ruby_version}.tar.gz"
   fi
