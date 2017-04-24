@@ -218,4 +218,24 @@ get_ruby_type() {
 }
 
 
+install_default_gems() {
+  local default_gems="${HOME}/.default-gems"
+
+  if [ ! -f $default_gems ]; then return; fi
+
+  echo ""
+
+  for name in $(cat $default_gems); do
+    echo -n "Installing ${name} gem... "
+
+    if gem install $name > /dev/null 2>&1; then
+      echo "SUCCESS"
+    else
+      echo "FAIL"
+    fi
+  done
+}
+
+
 install_ruby $ASDF_INSTALL_TYPE $ASDF_INSTALL_VERSION $ASDF_INSTALL_PATH
+install_default_gems

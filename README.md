@@ -19,6 +19,18 @@ When installing Ruby using `asdf install`, you can pass custom configure options
 * `RUBY_CONFIGURE_OPTIONS` - use only your configure options
 * `RUBY_EXTRA_CONFIGURE_OPTIONS` - append these configure options along with ones that this plugin already uses
 
+## Default gems
+
+asdf-ruby can automatically install a set of default gems right after
+installing a Ruby version. To enable this feature, provide a
+`$HOME/.default-gems` file that lists one gem per line, for example:
+
+```
+bundler
+pry
+gem-ctags
+```
+
 ## Migrating from another Ruby version manager
 
 ### `.ruby-version` file
