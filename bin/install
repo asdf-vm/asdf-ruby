@@ -5,6 +5,7 @@ install_ruby() {
   local version=$2
   local install_path=$3
   local ruby_type=$(get_ruby_type $version)
+  local start_dir=$(pwd)
 
   if [ "$TMPDIR" = "" ]; then
     local tmp_download_dir=$(mktemp -d -t ruby_build_XXXXXX)
@@ -36,6 +37,8 @@ install_ruby() {
       echo "WARNING: Might use OS-provided pkgs for the following: $ASDF_PKG_MISSING"
     fi
 
+    apply_custom_patches $start_dir || exit 1
+
     local configure_options="$(construct_configure_options $install_path)"
     # set in os_based_configure_options
     # we unset it here because echo-ing changes the return value of the function
@@ -49,6 +52,40 @@ install_ruby() {
   )
 }
 
+apply_custom_patches() {
+  local start_dir=$1
+  while read -r line; do
+    if [ "$line" = "" ]; then
+      continue
+    fi
+    # define earlier, so that the exit 1 shorthand below works
+    local content
+    if [[ "$line" =~ ^[Hh][Tt][Tt][Pp][Ss]?:// ]]; then
+      echo "Applying patch from URL: $line"
+      content=$(curl -s "$line") || exit 1
+    else
+      local abs_path=$(get_absolute_path "$start_dir" "$line")
+      echo "Applying local patch: $abs_path"
+      content=$(<"$abs_path") || exit 1
+    fi
+
+    local striplevel=0
+    grep -q '^diff --git a/' <<< "$content" && striplevel=1
+    patch -p$striplevel --force <<< "$content" || exit 1
+  done <<< "$RUBY_APPLY_PATCHES"
+}
+
+get_absolute_path() {
+  local start_dir=$1
+  local rel_path=$2
+  local rel_dir=$(dirname "$rel_path")
+  local rel_base=$(basename "$rel_path")
+
+  echo $(
+    cd "$start_dir"
+    cd "$rel_dir" 2>/dev/null && echo "$(pwd)/$rel_base" || echo "$rel_path"
+  )
+}
 
 construct_configure_options() {
   local install_path=$1
