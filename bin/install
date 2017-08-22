@@ -37,7 +37,7 @@ install_ruby() {
       echo "WARNING: Might use OS-provided pkgs for the following: $ASDF_PKG_MISSING"
     fi
 
-    apply_custom_patches $start_dir || exit 1
+    apply_custom_patches "$start_dir" || exit 1
 
     local configure_options="$(construct_configure_options $install_path)"
     # set in os_based_configure_options
@@ -81,9 +81,11 @@ get_absolute_path() {
   local rel_dir=$(dirname "$rel_path")
   local rel_base=$(basename "$rel_path")
 
-  echo $(
-    cd "$start_dir"
-    cd "$rel_dir" 2>/dev/null && echo "$(pwd)/$rel_base" || echo "$rel_path"
+  (
+    cd "$start_dir" \
+      && cd "$rel_dir" 2>/dev/null \
+      && echo "$(pwd)/$rel_base" \
+      || echo "$rel_path"
   )
 }
 
