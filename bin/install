@@ -47,7 +47,7 @@ install_ruby() {
     echo "Building with options: $configure_options"
 
     ./configure $configure_options || exit 1
-    make || exit 1
+    make -j"${ASDF_CONCURRENCY:-1}" || exit 1
     make install || exit 1
   )
 }
