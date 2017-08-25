@@ -19,6 +19,13 @@ When installing Ruby using `asdf install`, you can pass custom configure options
 * `RUBY_CONFIGURE_OPTIONS` - use only your configure options
 * `RUBY_EXTRA_CONFIGURE_OPTIONS` - append these configure options along with ones that this plugin already uses
 
+You may also apply custom patches before building with `RUBY_APPLY_PATCHES`, e.g.
+
+```
+RUBY_APPLY_PATCHES=$'dir/1.patch\n2.patch\nhttp://example.com/3.patch' asdf install ruby 2.4.1
+RUBY_APPLY_PATCHES=$(curl -s https://raw.githubusercontent.com/rvm/rvm/master/patchsets/ruby/2.1.1/railsexpress) asdf install ruby 2.1.1
+```
+
 ## Default gems
 
 asdf-ruby can automatically install a set of default gems right after
