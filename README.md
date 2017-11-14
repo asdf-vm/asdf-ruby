@@ -63,7 +63,7 @@ directory:
 #### rbenv
 
     mkdir ~/.asdf/installs/
-    mv ~/.rbenv/versions ~/.asdf/installs/ruby/
+    mv -T ~/.rbenv/versions ~/.asdf/installs/ruby/
 
 #### chruby
 
