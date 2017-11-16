@@ -218,9 +218,14 @@ get_download_url() {
 
   local ruby_type=$(get_ruby_type $version)
   local ruby_version=$(get_ruby_version $version)
+  local ruby_1_9=$ruby_version | grep "1.9"
 
   if [ "${ruby_type}" = "ruby" ]; then
-    echo "https://cache.ruby-lang.org/pub/ruby/ruby-${ruby_version}.tar.gz"
+    if [ "$ruby_1_9" == true ]; then
+      echo "https://cache.ruby-lang.org/pub/ruby/1.9/ruby-${ruby_version}.tar.gz"
+    else
+      echo "https://cache.ruby-lang.org/pub/ruby/ruby-${ruby_version}.tar.gz"
+    fi
   elif [ "${ruby_type}" = "jruby" ]; then
     echo "https://s3.amazonaws.com/jruby.org/downloads/${ruby_version}/jruby-bin-${ruby_version}.tar.gz"
   fi
