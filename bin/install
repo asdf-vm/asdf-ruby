@@ -24,7 +24,7 @@ fetch_patches() {
     if [ "$line" = "" ]; then continue; fi
     if [[ "$line" =~ ^[Hh][Tt][Tt][Pp][Ss]?:// ]]; then
       >&2 echo "Using patch from URL: $line"
-      curl -s "$line" || exit 1
+      curl -fSs "$line" || exit 1
     else
       local abs_path=$(get_absolute_path "$line")
       >&2 echo "Using local patch: $abs_path"
