@@ -5,9 +5,9 @@ get_legacy_version() {
   ruby_version_file="$current_directory/.ruby-version"
 
   # Get version from .ruby-version file. .ruby-version is used by rbenv and now rvm.
-  if [ -f $ruby_version_file ]; then
-    cat $ruby_version_file
+  if [ -f "$ruby_version_file" ]; then
+    cat "$ruby_version_file"
   fi
 }
 
-get_legacy_version $1
+get_legacy_version "$1"

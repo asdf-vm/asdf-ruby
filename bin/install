@@ -51,21 +51,21 @@ install_default_gems() {
   local default_gems="${HOME}/.default-gems"
   local gem_bin="${ASDF_INSTALL_PATH}/bin/gem"
 
-  if [ ! -f $default_gems ]; then return; fi
+  if [ ! -f "$default_gems" ]; then return; fi
 
   echo ""
 
-  for name in $(cat $default_gems); do
+  while read -r name; do
     echo -n "Installing ${name} gem... "
 
-    if $gem_bin install $name > /dev/null 2>&1; then
+    if $gem_bin install "$name" > /dev/null 2>&1; then
       echo "SUCCESS"
     else
       echo "FAIL"
     fi
-  done
+  done <<< "$(cat "$default_gems")"
 }
 
 ensure_ruby_build_available
-install_ruby $ASDF_INSTALL_TYPE $ASDF_INSTALL_VERSION $ASDF_INSTALL_PATH
+install_ruby "$ASDF_INSTALL_TYPE" "$ASDF_INSTALL_VERSION" "$ASDF_INSTALL_PATH"
 install_default_gems
