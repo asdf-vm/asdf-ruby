@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 
 get_legacy_version() {
-    current_directory=$1
-    ruby_version_file="$current_directory/.ruby-version"
+  current_directory=$1
+  ruby_version_file="$current_directory/.ruby-version"
 
-    # Get version from .ruby-version file. .ruby-version is used by rbenv and now rvm.
-    if [ -f $ruby_version_file ]; then
-        cat $ruby_version_file
-    fi
+  # Get version from .ruby-version file. .ruby-version is used by rbenv and now rvm.
+  if [ -f $ruby_version_file ]; then
+    cat $ruby_version_file
+  fi
 }
 
 get_legacy_version $1
