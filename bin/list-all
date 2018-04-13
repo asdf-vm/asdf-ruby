@@ -1,29 +1,11 @@
 #!/usr/bin/env bash
 
-RUBY_VERSIONS_URL=https://raw.githubusercontent.com/postmodern/ruby-versions/master/ruby/versions.txt
-JRUBY_VERSIONS_URL=https://raw.githubusercontent.com/postmodern/ruby-versions/master/jruby/versions.txt
+source $(dirname $0)/utils.sh
 
-function get_versions() {
-  curl --silent $1
+list_all() {
+  ensure_ruby_build_installed
+
+  $(ruby_build_path) --definitions | tr '\n' ' '
 }
 
-ruby_versions=$(
-  get_versions $RUBY_VERSIONS_URL
-)
-jruby_versions=$(
-  get_versions $JRUBY_VERSIONS_URL
-)
-
-versions=""
-
-for version in ${jruby_versions[@]}
-do
-  versions="${versions} jruby-${version}"
-done
-
-for version in ${ruby_versions[@]}
-do
-  versions="${versions} ${version}"
-done
-
-echo $versions
+list_all

@@ -1,281 +1,69 @@
 #!/usr/bin/env bash
 
+set -e
+set -o pipefail
+
+source "$(dirname "$0")/utils.sh"
+
+fetch_patches() {
+  local patches=$1
+
+  while read -r line; do
+    echo "$line"
+    if [ "$line" = "" ]; then
+      continue;
+    fi
+
+    if [[ "$line" =~ ^[Hh][Tt][Tt][Pp][Ss]?:// ]]; then
+      echo "Using patch from URL: $line" >&2
+      curl -fSs "$line" || exit 1
+    else
+      local abs_path=$(abspath "$line")
+      echo "Using local patch: $abs_path" >&2
+      cat "$abs_path" || exit 1
+    fi
+  done <<< "$patches"
+}
+
 install_ruby() {
   local install_type=$1
   local version=$2
   local install_path=$3
-  local ruby_type=$(get_ruby_type $version)
-  local start_dir=$(pwd)
 
-  if [ "$TMPDIR" = "" ]; then
-    local tmp_download_dir=$(mktemp -d -t ruby_build_XXXXXX)
-  else
-    local tmp_download_dir=$TMPDIR
-  fi
-
-  # path to the tar file
-  local source_path=$(get_download_file_path $install_type $version $tmp_download_dir)
-
-  download_source $install_type $version $source_path
-
-  # running this in a subshell
-  # because we don't want to disturb current working dir
-  (
-    cd $(dirname $source_path)
-    if [ "${ruby_type}" = "jruby" ]; then
-      tar zxf $source_path -C $(dirname $install_path) || exit 1
-      exit 0
-    else
-      tar zxf $source_path || exit 1
-    fi
-
-    # we use untar path because the extracted dir maybe diff
-    # ideally should be using tar with --strip-components 1
-    cd $(untar_path $install_type $version $tmp_download_dir)
-
-    if [ "$ASDF_PKG_MISSING" != "" ]; then
-      echo "WARNING: Might use OS-provided pkgs for the following: $ASDF_PKG_MISSING"
-    fi
-
-    apply_custom_patches "$start_dir" || exit 1
-
-    local configure_options="$(construct_configure_options $install_path)"
-    # set in os_based_configure_options
-    # we unset it here because echo-ing changes the return value of the function
-    unset ASDF_PKG_MISSING
-
-    echo "Building with options: $configure_options"
-
-    ./configure $configure_options || exit 1
-    make -j"${ASDF_CONCURRENCY:-1}" || exit 1
-    make install || exit 1
-  )
-}
-
-apply_custom_patches() {
-  local start_dir=$1
-  while read -r line; do
-    if [ "$line" = "" ]; then
-      continue
-    fi
-    # define earlier, so that the exit 1 shorthand below works
-    local content
-    if [[ "$line" =~ ^[Hh][Tt][Tt][Pp][Ss]?:// ]]; then
-      echo "Applying patch from URL: $line"
-      content=$(curl -s "$line") || exit 1
-    else
-      local abs_path=$(get_absolute_path "$start_dir" "$line")
-      echo "Applying local patch: $abs_path"
-      content=$(<"$abs_path") || exit 1
-    fi
-
-    local striplevel=0
-    grep -q '^diff --git a/' <<< "$content" && striplevel=1
-    patch -p$striplevel --force <<< "$content" || exit 1
-  done <<< "$RUBY_APPLY_PATCHES"
-}
-
-get_absolute_path() {
-  local start_dir=$1
-  local rel_path=$2
-  local rel_dir=$(dirname "$rel_path")
-  local rel_base=$(basename "$rel_path")
-
-  (
-    cd "$start_dir" \
-      && cd "$rel_dir" 2>/dev/null \
-      && echo "$(pwd)/$rel_base" \
-      || echo "$rel_path"
-  )
-}
-
-construct_configure_options() {
-  local install_path=$1
-
-  if [ "$RUBY_CONFIGURE_OPTIONS" = "" ]; then
-    local configure_options="$(os_based_configure_options) --prefix=$install_path"
-
-    if [ "$RUBY_EXTRA_CONFIGURE_OPTIONS" != "" ]; then
-      configure_options="$configure_options $RUBY_EXTRA_CONFIGURE_OPTIONS"
-    fi
-  else
-    local configure_options="$RUBY_CONFIGURE_OPTIONS --prefix=$install_path"
-  fi
-
-  echo "$configure_options"
-}
-
-
-homebrew_package_path() {
-  local package_name=$1
-
-  if [ "$(brew ls --versions $package_name)" = "" ]; then
-    echo ""
-  else
-    echo "$(brew --prefix $package_name)"
-  fi
-}
-
-
-exit_if_homebrew_not_installed() {
-  if [ "$(brew --version 2>/dev/null)" = "" ]; then
-    echo "ERROR: Please install homebrew for OSX"
+  if [ "$install_type" != "version" ]; then
+    echoerr "Cannot install specific ref from source, sorry."
+    echoerr "For a list of available versions, see \`asdf list-all ruby\`."
     exit 1
   fi
-}
 
-
-os_based_configure_options() {
-  local operating_system=$(uname -a)
-  local configure_options=""
-
-  if [[ "$operating_system" =~ "Darwin" ]]; then
-
-    exit_if_homebrew_not_installed
-
-    local openssl_path=$(homebrew_package_path openssl)
-    local libyaml_path=$(homebrew_package_path libyaml)
-    local readline_path=$(homebrew_package_path readline)
+  echo "ruby-build $version $install_path"
+  if [ -z "$RUBY_APPLY_PATCHES" ]; then
+    $(ruby_build_path) "$version" "$install_path"
   else
-    local openssl_path=/usr
-    local libyaml_path=/usr
-  fi
-
-  if [ "$openssl_path" = "" ]; then
-    export ASDF_PKG_MISSING="openssl"
-  else
-    configure_options="--with-openssl-dir=$openssl_path"
-  fi
-
-  if [ "$libyaml_path" = "" ]; then
-    export ASDF_PKG_MISSING="$ASDF_PKG_MISSING libyaml"
-  else
-    configure_options="$configure_options --with-libyaml-dir=$libyaml_path"
-  fi
-
-  if [ "$readline_path" != "" ]; then
-    configure_options="$configure_options --with-readline-dir=$readline_path"
-  fi
-
-  configure_options="$configure_options --enable-shared --disable-install-doc"
-  echo $configure_options
-}
-
-
-download_source() {
-  local install_type=$1
-  local version=$2
-  local download_path=$3
-  local download_url=$(get_download_url $install_type $version)
-
-  if [ -f $download_path ]; then
-    rm $download_path
-  fi
-
-  curl -Lo $download_path $download_url
-}
-
-
-get_download_file_path() {
-  local install_type=$1
-  local version=$2
-  local tmp_download_dir=$3
-
-  local ruby_type=$(get_ruby_type $version)
-  local ruby_version=$(get_ruby_version $version)
-
-  if [ "${ruby_type}" = "ruby" ]; then
-    local pkg_name="ruby-${ruby_version}.tar.gz"
-  elif [ "${ruby_type}" = "jruby" ]; then
-    local pkg_name="jruby-bin-${ruby_version}.tar.gz"
-  fi
-
-  echo "$tmp_download_dir/$pkg_name"
-}
-
-
-untar_path() {
-  local install_type=$1
-  local version=$2
-  local tmp_download_dir=$3
-
-  local ruby_type=$(get_ruby_type $version)
-  local ruby_version=$(get_ruby_version $version)
-
-  if [ "${ruby_type}" = "ruby" ]; then
-    local dir_name="ruby-${ruby_version}"
-  elif [ "${ruby_type}" = "jruby" ]; then
-    local dir_name="jruby-${ruby_version}"
-  fi
-
-  echo "$tmp_download_dir/$dir_name"
-}
-
-
-get_download_url() {
-  local install_type=$1
-  local version=$2
-
-  local ruby_type=$(get_ruby_type $version)
-  local ruby_version=$(get_ruby_version $version)
-
-  if [ "${ruby_type}" = "ruby" ]; then
-    echo "https://cache.ruby-lang.org/pub/ruby/ruby-${ruby_version}.tar.gz"
-  elif [ "${ruby_type}" = "jruby" ]; then
-    echo "https://s3.amazonaws.com/jruby.org/downloads/${ruby_version}/jruby-bin-${ruby_version}.tar.gz"
-  fi
-}
-
-get_ruby_version() {
-  IFS='-' read -a version_info <<< "$1"
-
-  if [ "${version_info[0]}" = "jruby" ]; then
-    # jruby
-    if [ "${#version_info[@]}" -eq 2 ]; then
-      echo "${version_info[1]}"
-    else
-      echo "${version_info[1]}-${version_info[2]}"
-    fi
-  else
-    # ruby
-    if [ "${#version_info[@]}" -eq 1 ]; then
-      echo "${version_info[0]}"
-    else
-      echo "${version_info[0]}-${version_info[1]}"
-    fi
-  fi
-}
-
-
-get_ruby_type() {
-  IFS='-' read -a version_info <<< "$1"
-  if [ "${version_info[0]}" = "jruby" ]; then
-    echo "jruby"
-  else
-    echo "ruby"
+    fetch_patches "$RUBY_APPLY_PATCHES" | $(ruby_build_path) --patch "$version" "$install_path"
   fi
 }
 
 
 install_default_gems() {
-  local default_gems="${HOME}/.default-gems"
-  local gem_bin="${ASDF_INSTALL_PATH}/bin/gem"
+  local default_gems="$HOME/.default-gems"
+  local gem="$ASDF_INSTALL_PATH/bin/gem"
 
-  if [ ! -f $default_gems ]; then return; fi
+  if [ ! -f "$default_gems" ]; then
+    return;
+  fi
 
-  echo ""
+  while read -r name; do
+    echo -ne "\nInstalling gem ${name}... "
 
-  for name in $(cat $default_gems); do
-    echo -n "Installing ${name} gem... "
-
-    if $gem_bin install $name > /dev/null 2>&1; then
-      echo "SUCCESS"
+    if $gem install "$name" >/dev/null 2>&1; then
+      echo -e "SUCCESS"
     else
-      echo "FAIL"
+      echo -e "FAIL"
     fi
-  done
+  done < "$default_gems"
 }
 
-
-install_ruby $ASDF_INSTALL_TYPE $ASDF_INSTALL_VERSION $ASDF_INSTALL_PATH
+ensure_ruby_build_installed
+install_ruby "$ASDF_INSTALL_TYPE" "$ASDF_INSTALL_VERSION" "$ASDF_INSTALL_PATH"
 install_default_gems
