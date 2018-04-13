@@ -6,6 +6,8 @@ set -o pipefail
 source "$(dirname "$0")/utils.sh"
 
 fetch_patches() {
+  local patches=$1
+
   while read -r line; do
     echo "$line"
     if [ "$line" = "" ]; then
@@ -20,7 +22,7 @@ fetch_patches() {
       echo "Using local patch: $abs_path" >&2
       cat "$abs_path" || exit 1
     fi
-  done <<< "${RUBY_APPLY_PATCHES:-}"
+  done <<< "$patches"
 }
 
 install_ruby() {
@@ -35,7 +37,11 @@ install_ruby() {
   fi
 
   echo "ruby-build $version $install_path"
-  fetch_patches | $(ruby_build_path) --patch "$version" "$install_path"
+  if [ -z "$RUBY_APPLY_PATCHES" ]; then
+    $(ruby_build_path) "$version" "$install_path"
+  else
+    fetch_patches "$RUBY_APPLY_PATCHES" | $(ruby_build_path) --patch "$version" "$install_path"
+  fi
 }
 
 
