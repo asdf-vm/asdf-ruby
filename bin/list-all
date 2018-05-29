@@ -3,11 +3,12 @@
 set -euo pipefail
 
 # shellcheck source=../lib/utils.sh
-source "$(dirname "${BASH_SOURCE[0]}")/../lib/utils.sh"
+source "$(dirname $0)/../lib/utils.sh"
 
 list_versions() {
-  ruby-build --definitions | paste -sd " " -
+  ensure_ruby_build_setup
+
+  "$(ruby_build_path)" --definitions | paste -sd " " -
 }
 
-ensure_ruby_build_available
 list_versions

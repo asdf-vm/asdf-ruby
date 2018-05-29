@@ -3,9 +3,11 @@
 set -euo pipefail
 
 # shellcheck source=../lib/utils.sh
-source "$(dirname "${BASH_SOURCE[0]}")/../lib/utils.sh"
+source "$(dirname $0)/../lib/utils.sh"
 
 install_ruby() {
+  ensure_ruby_build_setup
+
   local install_type=$1
   local version=$2
   local install_path=$3
@@ -66,6 +68,5 @@ install_default_gems() {
   done <<< "$(cat "$default_gems")"
 }
 
-ensure_ruby_build_available
 install_ruby "$ASDF_INSTALL_TYPE" "$ASDF_INSTALL_VERSION" "$ASDF_INSTALL_PATH"
 install_default_gems
