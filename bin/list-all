@@ -8,7 +8,9 @@ source "$(dirname $0)/../lib/utils.sh"
 list_versions() {
   ensure_ruby_build_setup
 
-  "$(ruby_build_path)" --definitions | paste -sd " " -
+  # This sed command was a quick and dirty solution to remove topaz-dev from
+  # the version list, since it doesn't exist
+  "$(ruby_build_path)" --definitions | paste -sd " " - | sed "s|topaz-dev||g"
 }
 
 list_versions
