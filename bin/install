@@ -18,7 +18,7 @@ install_ruby() {
     exit 1
   fi
 
-  fetch_patches | ruby-build --patch "$version" "$install_path" ${RUBY_BUILD_OPTS:-}
+  fetch_patches | $(ruby_build_path) --patch "$version" "$install_path" ${RUBY_BUILD_OPTS:-}
 }
 
 fetch_patches() {
