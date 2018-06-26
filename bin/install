@@ -51,19 +51,21 @@ get_absolute_path() {
 
 install_default_gems() {
   local default_gems="${HOME}/.default-gems"
-  local gem_bin="${ASDF_INSTALL_PATH}/bin/gem"
+  local gem="${ASDF_INSTALL_PATH}/bin/gem"
 
-  if [ ! -f "$default_gems" ]; then return; fi
+  if [ ! -f "$default_gems" ]; then
+    return;
+  fi
 
   echo ""
 
   while read -r name; do
     echo -n "Installing ${name} gem... "
 
-    if $gem_bin install "$name" > /dev/null 2>&1; then
-      echo "SUCCESS"
+    if $gem install "$name" > /dev/null 2>&1; then
+      echo -e "SUCCESS"
     else
-      echo "FAIL"
+      echo -e "FAIL"
     fi
   done <<< "$(cat "$default_gems")"
 }
