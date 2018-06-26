@@ -10,11 +10,11 @@ Ruby plugin for [asdf](https://github.com/asdf-vm/asdf) version manager
 asdf plugin-add ruby https://github.com/asdf-vm/asdf-ruby.git
 ```
 
+Please make sure you have the required [system dependencies](https://github.com/rbenv/ruby-build/wiki#suggested-build-environment) installed before trying to install Ruby.
+
 ## Use
 
 Check [asdf](https://github.com/asdf-vm/asdf) readme for instructions on how to install & manage versions of Ruby.
-
-Please make sure you have the required [system dependencies](https://github.com/rbenv/ruby-build/wiki#suggested-build-environment) installed before trying to install Ruby.
 
 When installing Ruby using `asdf install`, you can pass custom configure options with the [env vars supported by ruby-build](https://github.com/rbenv/ruby-build#custom-build-configuration).
 
