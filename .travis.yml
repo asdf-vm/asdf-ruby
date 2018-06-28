@@ -1,8 +1,0 @@
-language: c
-script: asdf plugin-test ruby https://github.com/asdf-vm/asdf-ruby.git
-before_script:
-  - git clone https://github.com/asdf-vm/asdf.git
-  - . asdf/asdf.sh
-os:
-  - linux
-  - osx
