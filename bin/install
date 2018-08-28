@@ -37,7 +37,7 @@ fetch_patches() {
 
 get_absolute_path() {
   local start_dir=$(pwd)
-  local rel_path=$2
+  local rel_path=$1
   local rel_dir=$(dirname "$rel_path")
   local rel_base=$(basename "$rel_path")
 
