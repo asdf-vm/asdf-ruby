@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+
+# Get version from .ruby-version file. .ruby-version is used by rbenv and now rvm.
+ruby_version_file=".ruby-version"
+get_ruby_version() {
+  local root="$1"
+  while [ -n "$root" ]; do
+    if [ -e "${root}/$ruby_version_file" ]; then
+      echo "${root}/$ruby_version_file"
+      exit
+    fi
+    root="${root%/*}"
+  done
+}
+
+find_gemfile_path() {
+  local root="$1"
+  while [ -n "$root" ]; do
+    if [ -e "${root}/Gemfile" ]; then
+      echo "${root}/Gemfile"
+      exit
+    fi
+    root="${root%/*}"
+  done
+}
+
+version_from_gemfile() {
+  # handles simple ruby statements, as well as engine and engine_version,
+  # with single or double quotes and in either order
+
+  grep '^\s*ruby' "$GEMFILE_PATH" |
+    sed -e 's/[[:space:]]/ /g' -e 's/#.*//' \
+        -e 's/engine:/:engine =>/' -e 's/engine_version:/:engine_version =>/' \
+        -e "s/.*:engine *=> *['\"]\([^'\"]*\).*:engine_version *=> *['\"]\([^'\"]*\).*/\1-\2/" \
+        -e "s/.*:engine_version *=> *['\"]\([^'\"]*\).*:engine *=> *['\"]\([^'\"]*\).*/\2-\1/" \
+        -e "s/ *ruby *['\"]\([^'\"]*\).*/\1/" |
+    head -1
+}
+
+RUBY_VERSION=$(get_ruby_version "$PWD")
+
+if [ -z "$RUBY_VERSION" ]; then
+  GEMFILE_PATH=$(find_gemfile_path "$PWD")
+
+  if [ -e "$GEMFILE_PATH" ]; then
+    version_from_gemfile
+  fi
+else 
+  cat "$RUBY_VERSION"
+fi
