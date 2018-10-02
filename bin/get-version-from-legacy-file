@@ -4,9 +4,12 @@ get_legacy_version() {
   current_directory=$1
   ruby_version_file="$current_directory/.ruby-version"
 
-  # Get version from .ruby-version file. .ruby-version is used by rbenv and now rvm.
+  # Get version from .ruby-version file (filters out 'ruby-' prefix if it exists).
+  # The .ruby-version is used by rbenv and now rvm.
   if [ -f "$ruby_version_file" ]; then
-    cat "$ruby_version_file"
+    ruby_version=$(cat "$ruby_version_file")
+    ruby_prefix="ruby-"
+    echo ${ruby_version/#$ruby_prefix}
   fi
 }
 
