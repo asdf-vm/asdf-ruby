@@ -12,7 +12,9 @@ if [ "$basename" == "Gemfile" ]; then
     -e "s/ *ruby *['\"]\([^'\"]*\).*/\1/" |
     head -1)
 elif [ "$basename" == ".ruby-version" ]; then
-  RUBY_VERSION=$(cat "$current_file")
+  ruby_version=$(cat "$current_file")
+  ruby_prefix="ruby-"
+  RUBY_VERSION=${ruby_version/#$ruby_prefix}
 fi
 
 echo "$RUBY_VERSION"
