@@ -9,7 +9,9 @@ install_ruby() {
   ensure_ruby_build_setup
 
   local install_type=$1
-  local version=$2
+  local raw_version=$2
+  local version=${raw_version%%@*}
+  local gemset=${raw_version##*@}
   local install_path=$3
 
   if [ "$install_type" != "version" ]; then

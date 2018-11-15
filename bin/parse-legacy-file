@@ -1,15 +1,33 @@
 #!/usr/bin/env bash
 
 get_legacy_version() {
-  ruby_version_file=$1
+  legacy_version_path=$1
+  current_directory=${legacy_version_path%/*}
+  current_filename=${legacy_version_path##*/}
+  ruby_version=
 
-  # Get version from .ruby-version file (filters out 'ruby-' prefix if it exists).
-  # The .ruby-version is used by rbenv and now rvm.
-  if [ -f "$ruby_version_file" ]; then
-    ruby_version=$(cat "$ruby_version_file")
-    ruby_prefix="ruby-"
-    echo ${ruby_version/#$ruby_prefix}
+  if [ "$current_filename" == ".ruby-version" ]; then
+    ruby_version_file="$current_directory/.ruby-version"
+
+    # Get version from .ruby-version file (filters out 'ruby-' prefix if it exists).
+    # The .ruby-version is used by rbenv and now rvm.
+    if [ -f "$ruby_version_file" ]; then
+      ruby_version=$(< "$ruby_version_file")
+      ruby_prefix="ruby-"
+      ruby_version=${ruby_version/#$ruby_prefix}
+    fi
+
+    # Get rvm-style gemset from .ruby-gemset file and append that to the version for a
+    # pseudo-gemset functionality (no inheritance between this and a global gemset e.g.)
+    ruby_gemset_file="$current_directory/.ruby-gemset"
+
+    if [ -f "$ruby_gemset_file" ]; then
+      raw_ruby_gemset=$(< "$ruby_gemset_file")
+      ruby_version=${ruby_version}@${raw_ruby_gemset}
+    fi
   fi
+
+  echo $ruby_version
 }
 
 get_legacy_version "$1"
