@@ -58,15 +58,15 @@ directory:
 
 #### RVM
 
-    mkdir ~/.asdf/installs/
+    mkdir -p ~/.asdf/installs/ruby
     mv ~/.rvm/rubies ~/.asdf/installs/ruby/
 
 #### rbenv
 
-    mkdir ~/.asdf/installs/
+    mkdir -p ~/.asdf/installs/ruby
     mv ~/.rbenv/versions/* ~/.asdf/installs/ruby/
 
 #### chruby
 
-    mkdir ~/.asdf/installs/
+    mkdir -p ~/.asdf/installs/ruby
     mv ~/.rubies ~/.asdf/installs/ruby/
