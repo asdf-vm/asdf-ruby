@@ -49,24 +49,3 @@ find out what version of Ruby should be used. To do this, add the following to
 `$HOME/.asdfrc`:
 
     legacy_version_file = yes
-
-### Rubies
-
-asdf installs Rubies to `$HOME/.asdf/installs/ruby`, the directory structure is
-the same as other version managers, so you can just move the Rubies to this
-directory:
-
-#### RVM
-
-    mkdir ~/.asdf/installs/
-    mv ~/.rvm/rubies ~/.asdf/installs/ruby/
-
-#### rbenv
-
-    mkdir ~/.asdf/installs/
-    mv ~/.rbenv/versions/* ~/.asdf/installs/ruby/
-
-#### chruby
-
-    mkdir ~/.asdf/installs/
-    mv ~/.rubies ~/.asdf/installs/ruby/
