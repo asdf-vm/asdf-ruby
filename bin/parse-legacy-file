@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 
 get_legacy_version() {
-  current_directory=$1
-  ruby_version_file="$current_directory/.ruby-version"
+  ruby_version_file=$1
 
   # Get version from .ruby-version file (filters out 'ruby-' prefix if it exists).
   # The .ruby-version is used by rbenv and now rvm.
