@@ -59,15 +59,36 @@ install_default_gems() {
 
   echo ""
 
-  while read -r name_and_optional_gem_install_options; do
-    echo -n "Running: gem install ${name_and_optional_gem_install_options} ... "
+  # Parsing of .default-gems was originally lifted from rbenv-default-gems
+  # which is Copyright (c) 2013 Sam Stephenson
+  # https://github.com/rbenv/rbenv-default-gems/blob/ead6788/LICENSE
+  while IFS=" " read -r -a line; do
 
-    if $gem install $name_and_optional_gem_install_options > /dev/null 2>&1; then
+    # Skip empty lines.
+    [ "${#line[@]}" -gt 0 ] || continue
+
+    # Skip comment lines that begin with `#`.
+    [ "${line[0]:0:1}" != "#" ] || continue
+
+    gem_name="${line[0]}"
+    gem_version="${line[1]-}"
+
+    if [ "$gem_version" == "--pre" ]; then
+      args=( --pre )
+    elif [ -n "$gem_version" ]; then
+      args=( --version "$gem_version" )
+    else
+      args=()
+    fi
+
+    echo -n "Running: gem install "$gem_name" "${args[@]}" ... "
+
+    if $gem install "$gem_name" "${args[@]}" > /dev/null 2>&1; then
       echo -e "SUCCESS"
     else
       echo -e "FAIL"
     fi
-  done <<< "$(cat "$default_gems")"
+  done < "$default_gems"
 }
 
 install_ruby "$ASDF_INSTALL_TYPE" "$ASDF_INSTALL_VERSION" "$ASDF_INSTALL_PATH"
