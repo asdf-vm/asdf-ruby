@@ -59,10 +59,10 @@ install_default_gems() {
 
   echo ""
 
-  while read -r name; do
-    echo -n "Installing ${name} gem... "
+  while read -r name_and_optional_gem_install_options; do
+    echo -n "Running: gem install ${name_and_optional_gem_install_options} ... "
 
-    if $gem install "$name" > /dev/null 2>&1; then
+    if $gem install $name_and_optional_gem_install_options > /dev/null 2>&1; then
       echo -e "SUCCESS"
     else
       echo -e "FAIL"
