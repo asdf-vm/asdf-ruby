@@ -50,6 +50,7 @@ get_absolute_path() {
 }
 
 install_default_gems() {
+  local args=()
   local default_gems="${HOME}/.default-gems"
   local gem="${ASDF_INSTALL_PATH}/bin/gem"
 
@@ -81,12 +82,12 @@ install_default_gems() {
       args=()
     fi
 
-    echo -n "Running: gem install "$gem_name" "${args[@]}" ... "
+    echo -n "Running: gem install $gem_name ${args[@]:-} ... "
 
-    if $gem install "$gem_name" "${args[@]}" > /dev/null 2>&1; then
+    if output=$($gem install "$gem_name" "${args[@]:-}" 2>&1); then
       echo -e "SUCCESS"
     else
-      echo -e "FAIL"
+      echo -e "FAIL: $output"
     fi
   done < "$default_gems"
 }
