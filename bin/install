@@ -18,7 +18,20 @@ install_ruby() {
     exit 1
   fi
 
-  fetch_patches | $(ruby_build_path) --patch "$version" "$install_path" ${RUBY_BUILD_OPTS:-}
+  local opts=""
+  local patches=""
+
+  if [[ -n "${RUBY_APPLY_PATCHES:-}" ]]; then
+    opts="$opts --patch"
+    patches=$(fetch_patches "$RUBY_APPLY_PATCHES")
+  fi
+
+  if [[ -n "${RUBY_BUILD_OPTS:-}" ]]; then
+    opts="$opts $RUBY_BUILD_OPTS"
+  fi
+
+  # shellcheck disable=SC2086
+  echo "$patches" | $(ruby_build_path) ${opts} "$version" "$install_path"
 }
 
 fetch_patches() {
@@ -28,18 +41,24 @@ fetch_patches() {
       >&2 echo "Using patch from URL: $line"
       curl -fSs "$line" || exit 1
     else
-      local abs_path=$(get_absolute_path "$line")
+      local abs_path
+      abs_path="$(get_absolute_path "$line")"
       >&2 echo "Using local patch: $abs_path"
       cat "$abs_path" || exit 1
     fi
-  done <<< "${RUBY_APPLY_PATCHES:-}"
+  done <<< "$@"
 }
 
 get_absolute_path() {
-  local start_dir=$(pwd)
-  local rel_path=$1
-  local rel_dir=$(dirname "$rel_path")
-  local rel_base=$(basename "$rel_path")
+  local start_dir
+  local rel_path
+  local rel_dir
+  local rel_base
+
+  start_dir=$(pwd)
+  rel_path=$1
+  rel_dir=$(dirname "$rel_path")
+  rel_base=$(basename "$rel_path")
 
   (
     cd "$start_dir" \
