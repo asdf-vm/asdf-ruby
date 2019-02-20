@@ -49,3 +49,7 @@ find out what version of Ruby should be used. To do this, add the following to
 `$HOME/.asdfrc`:
 
     legacy_version_file = yes
+
+If you are migrating from version manager that supported fuzzy matching in `.ruby-version`
+like [rvm](https://github.com/rvm/rvm) or [chruby](https://github.com/postmodern/chruby),
+note that you might have to change `.ruby-version` to include full version (e.g. change `2.6` to `2.6.1`).
