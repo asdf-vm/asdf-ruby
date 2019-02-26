@@ -39,6 +39,9 @@ pry
 gem-ctags
 ```
 
+If you provide a `.default-gems` next to the `.tool-versions` file, asdf-ruby
+will use that instead.
+
 ## Migrating from another Ruby version manager
 
 ### `.ruby-version` file

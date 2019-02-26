@@ -70,11 +70,16 @@ get_absolute_path() {
 
 install_default_gems() {
   local args=()
-  local default_gems="${HOME}/.default-gems"
+  local home_default_gems="${HOME}/.default-gems"
+  local default_gems=".default-gems"
   local gem="${ASDF_INSTALL_PATH}/bin/gem"
 
   if [ ! -f "$default_gems" ]; then
-    return;
+    if [ -f "$home_default_gems" ]; then
+      default_gems=$home_default_gems
+    else
+      return;
+    fi
   fi
 
   echo ""
