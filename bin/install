@@ -68,9 +68,22 @@ get_absolute_path() {
   )
 }
 
+default_gem_path() {
+  local config_path=${ASDF_CONFIG_FILE:-"$HOME/.asdfrc"}
+  local config_dir=$(dirname "$config_path")
+  
+  if [ -f "${config_dir}/default-gems" ]; then
+    echo "${config_dir}/default-gems"
+  elif [ -f "${config_dir}/.default-gems" ]; then
+    echo "${config_dir}/.default-gems"
+  else
+    echo "${HOME}/.default-gems"
+  fi
+}
+
 install_default_gems() {
   local args=()
-  local default_gems="${HOME}/.default-gems"
+  local default_gems=$(default_gem_path)
   local gem="${ASDF_INSTALL_PATH}/bin/gem"
 
   if [ ! -f "$default_gems" ]; then
