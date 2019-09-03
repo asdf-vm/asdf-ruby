@@ -27,6 +27,12 @@ RUBY_APPLY_PATCHES=$'dir/1.patch\n2.patch\nhttp://example.com/3.patch' asdf inst
 RUBY_APPLY_PATCHES=$(curl -s https://raw.githubusercontent.com/rvm/rvm/master/patchsets/ruby/2.1.1/railsexpress) asdf install ruby 2.1.1
 ```
 
+By default asdf-ruby uses the latest release of ruby-build, but you can choose your own branch/tag through the `ASDF_RUBY_BUILD_VERSION` variable:
+
+```
+ASDF_RUBY_BUILD_VERSION=master asdf install ruby 2.6.4
+```
+
 ## Default gems
 
 asdf-ruby can automatically install a set of default gems right after
