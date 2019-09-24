@@ -17,6 +17,11 @@ ensure_ruby_build_installed() {
         download_ruby_build
     else
         current_ruby_build_version="$("$(ruby_build_path)" --version | cut -d ' ' -f2)"
+        # If ruby-build version does not start with 'v',
+        # add 'v' to beginning of version
+        if [ ${current_ruby_build_version:0:1} != "v" ]; then
+          current_ruby_build_version="v$current_ruby_build_version"
+        fi
         if [ "$current_ruby_build_version" != "$RUBY_BUILD_VERSION" ]; then
             # If the ruby-build directory already exists and the version does not
             # match, remove it and download the correct version
