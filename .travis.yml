@@ -1,12 +1,9 @@
 language: c
 script: asdf plugin-test ruby https://github.com/asdf-vm/asdf-ruby.git
 before_script:
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then export TRUFFLERUBY_RECOMPILE_OPENSSL=false; fi
   - git clone https://github.com/asdf-vm/asdf.git
   - . asdf/asdf.sh
 os:
   - linux
   - osx
-addons:
-  homebrew:
-    packages:
-      - llvm@4
