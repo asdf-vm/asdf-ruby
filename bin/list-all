@@ -10,7 +10,7 @@ list_versions() {
 
   # This sed command was a quick and dirty solution to remove topaz-dev from
   # the version list, since it doesn't exist
-  "$(ruby_build_path)" --definitions | paste -sd " " - | sed "s|topaz-dev||g"
+  "$(ruby_build_path)" --definitions | grep -v "topaz-dev" | paste -sd " " -
 }
 
-list_versions
+list_versions 2> /dev/null
