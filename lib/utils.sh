@@ -6,7 +6,6 @@ echoerr() {
 }
 
 ensure_ruby_build_setup() {
-  #set_ruby_build_env
   ensure_ruby_build_installed
 }
 
@@ -33,8 +32,11 @@ ensure_ruby_build_installed() {
 
 download_ruby_build() {
     # Print to stderr so asdf doesn't assume this string is a list of versions
-    echo "Downloading ruby-build..." >&2
-    local build_dir="$(asdf_ruby_plugin_path)/ruby-build-source"
+    echoerr "Downloading ruby-build..."
+    local build_dir="$(ruby_build_source_dir)"
+
+    # Remove directory in case it still exists from last download
+    rm -rf $build_dir
 
     # Clone down and checkout the correct ruby-build version
     git clone https://github.com/rbenv/ruby-build.git $build_dir >&2 >/dev/null
@@ -53,9 +55,11 @@ asdf_ruby_plugin_path() {
 ruby_build_dir() {
     echo "$(asdf_ruby_plugin_path)/ruby-build"
 }
+
+ruby_build_source_dir() {
+    echo "$(asdf_ruby_plugin_path)/ruby-build-source"
+}
+
 ruby_build_path() {
     echo "$(ruby_build_dir)/bin/ruby-build"
 }
-
-#set_ruby_build_env() {
-#}
