@@ -6,7 +6,6 @@ echoerr() {
 }
 
 ensure_ruby_build_setup() {
-  #set_ruby_build_env
   ensure_ruby_build_installed
 }
 
@@ -56,6 +55,3 @@ ruby_build_dir() {
 ruby_build_path() {
     echo "$(ruby_build_dir)/bin/ruby-build"
 }
-
-#set_ruby_build_env() {
-#}
