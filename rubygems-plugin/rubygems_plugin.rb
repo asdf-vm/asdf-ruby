@@ -9,10 +9,15 @@ end
 if defined?(Bundler::Installer)
   Bundler::Installer.prepend ReshimInstaller
 else
-  maybe_reshim = lambda do |installer|
-    # If any gems with executables were installed or uninstalled, reshim.
+  Gem.post_install do |installer|
+    # Reshim any (potentially) new executables.
+    installer.spec.executables.each do |executable|
+      `asdf reshim ruby #{RUBY_VERSION} bin/#{executable}`
+    end
+  end
+  Gem.post_uninstall do |installer|
+    # Unfortunately, reshimming just the removed executables or
+    # ruby version doesn't work as of 2020/04/23.
     `asdf reshim ruby` if installer.spec.executables.any?
   end
-  Gem.post_install &maybe_reshim
-  Gem.post_uninstall &maybe_reshim
 end
