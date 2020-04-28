@@ -103,7 +103,7 @@ install_default_gems() {
 
     echo -n "Running: gem install $gem_name ${args[@]:-} ... "
 
-    if output=$($gem install "$gem_name" "${args[@]:-}" 2>&1); then
+    if output=$($gem install "$gem_name" "${args[@]+"${args[@]}"}" 2>&1); then
       echo -e "SUCCESS"
     else
       echo -e "FAIL: $output"
