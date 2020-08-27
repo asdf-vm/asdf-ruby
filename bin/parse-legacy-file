@@ -10,7 +10,8 @@ get_legacy_version() {
       -e 's/engine:/:engine =>/' -e 's/engine_version:/:engine_version =>/' \
       -e "s/.*:engine *=> *['\"]\([^'\"]*\).*:engine_version *=> *['\"]\([^'\"]*\).*/\1-\2/" \
       -e "s/.*:engine_version *=> *['\"]\([^'\"]*\).*:engine *=> *['\"]\([^'\"]*\).*/\2-\1/" \
-      -e "s/ *ruby *['\"]\([^'\"]*\).*/\1/" |
+      -e "s/ *ruby *['\"]\([^'\"]*\).*/\1/" \
+      -e "/^[^0-9]/d" |
       head -1)
   elif [ "$basename" == ".ruby-version" ]; then
     # Get version from .ruby-version file (filters out 'ruby-' prefix if it exists).
