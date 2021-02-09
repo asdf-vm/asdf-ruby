@@ -20,10 +20,18 @@ install_ruby() {
 
   local opts=""
   local patches=""
+  local version_patches=""
 
-  if [[ -n "${RUBY_APPLY_PATCHES:-}" ]]; then
+  if [[ -n "${RUBY_APPLY_PATCHES:-}" || -n "${RUBY_APPLY_VERSION_PATCHES:-}" ]]; then
     opts="$opts --patch"
-    patches=$(fetch_patches "$RUBY_APPLY_PATCHES")
+
+    if [[ -n "${RUBY_APPLY_PATCHES:-}" ]]; then
+      patches=$(fetch_patches "$RUBY_APPLY_PATCHES")
+    fi
+
+    if [[ -n "${RUBY_APPLY_VERSION_PATCHES:-}" ]]; then
+      version_patches=$(fetch_version_patches "$RUBY_APPLY_VERSION_PATCHES")
+    fi
   fi
 
   if [[ -n "${RUBY_BUILD_OPTS:-}" ]]; then
@@ -31,13 +39,31 @@ install_ruby() {
   fi
 
   # shellcheck disable=SC2086
-  echo "$patches" | $(ruby_build_path) ${opts} "$version" "$install_path"
+  echo "${patches}${version_patches}" | $(ruby_build_path) ${opts} "$version" "$install_path"
 }
 
 fetch_patches() {
   while read -r line; do
     if [ "$line" = "" ]; then continue; fi
     fetch_patch "$line"
+  done <<< "$@"
+}
+
+fetch_version_patches() {
+  while read -r line; do
+    if [ "$line" = "" ]; then continue; fi
+    if [[ $line =~ (.*)=(.+) ]]; then
+      # ${BASH_REMATCH[1]} should be Ruby version, e.g. '2.7.2'
+      # ${BASH_REMATCH[2]} should be patch location, e.g. '/tmp/ruby-2.7.2_patch1.diff,/tmp/ruby-2.7.2_patch2.diff'
+      if [ "${BASH_REMATCH[1]}" == "$ASDF_INSTALL_VERSION" ]; then
+        local patch_locations
+        patch_locations=(${BASH_REMATCH[2]//,/ })
+
+        for patch_location in ${patch_locations[@]}; do
+          fetch_patch ${patch_location}
+        done
+      fi
+    fi
   done <<< "$@"
 }
 
