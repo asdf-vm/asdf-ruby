@@ -37,16 +37,23 @@ install_ruby() {
 fetch_patches() {
   while read -r line; do
     if [ "$line" = "" ]; then continue; fi
-    if [[ "$line" =~ ^[Hh][Tt][Tt][Pp][Ss]?:// ]]; then
-      >&2 echo "Using patch from URL: $line"
-      curl -fSs "$line" || exit 1
-    else
-      local abs_path
-      abs_path="$(get_absolute_path "$line")"
-      >&2 echo "Using local patch: $abs_path"
-      cat "$abs_path" || exit 1
-    fi
+    fetch_patch "$line"
   done <<< "$@"
+}
+
+fetch_patch() {
+  local patch_path
+  patch_path=$1
+
+  if [[ "$patch_path" =~ ^[Hh][Tt][Tt][Pp][Ss]?:// ]]; then
+    >&2 echo "Using patch from URL: $patch_path"
+    curl -fSs "$patch_path" || exit 1
+  else
+    local abs_path
+    abs_path="$(get_absolute_path "$patch_path")"
+    >&2 echo "Using local patch: $abs_path"
+    cat "$abs_path" || exit 1
+  fi
 }
 
 get_absolute_path() {
