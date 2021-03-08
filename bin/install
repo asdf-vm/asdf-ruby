@@ -6,7 +6,7 @@ set -euo pipefail
 source "$(dirname $0)/../lib/utils.sh"
 
 install_ruby() {
-  ensure_ruby_build_setup
+  ensure_ruby_install_setup
 
   local install_type=$1
   local version=$2
@@ -19,54 +19,21 @@ install_ruby() {
   fi
 
   local opts=""
-  local patches=""
+  local patches=" "
 
   if [[ -n "${RUBY_APPLY_PATCHES:-}" ]]; then
-    opts="$opts --patch"
-    patches=$(fetch_patches "$RUBY_APPLY_PATCHES")
+    patches=" --patch $RUBY_APPLY_PATCHES "
   fi
 
   if [[ -n "${RUBY_BUILD_OPTS:-}" ]]; then
-    opts="$opts $RUBY_BUILD_OPTS"
+    opts="-- $RUBY_BUILD_OPTS"
   fi
 
-  # shellcheck disable=SC2086
-  echo "$patches" | $(ruby_build_path) ${opts} "$version" "$install_path"
+  local command="$(ruby_install_path) --no-reinstall --cleanup --src-dir "$ASDF_DOWNLOAD_PATH" --install-dir "$install_path""$patches""$version" "$opts""
+  echo "$command"
+  echo $($command)
 }
 
-fetch_patches() {
-  while read -r line; do
-    if [ "$line" = "" ]; then continue; fi
-    if [[ "$line" =~ ^[Hh][Tt][Tt][Pp][Ss]?:// ]]; then
-      >&2 echo "Using patch from URL: $line"
-      curl -fSs "$line" || exit 1
-    else
-      local abs_path
-      abs_path="$(get_absolute_path "$line")"
-      >&2 echo "Using local patch: $abs_path"
-      cat "$abs_path" || exit 1
-    fi
-  done <<< "$@"
-}
-
-get_absolute_path() {
-  local start_dir
-  local rel_path
-  local rel_dir
-  local rel_base
-
-  start_dir=$(pwd)
-  rel_path=$1
-  rel_dir=$(dirname "$rel_path")
-  rel_base=$(basename "$rel_path")
-
-  (
-    cd "$start_dir" \
-      && cd "$rel_dir" 2>/dev/null \
-      && echo "$(pwd)/$rel_base" \
-      || echo "$rel_path"
-  )
-}
 
 install_default_gems() {
   local args=()
