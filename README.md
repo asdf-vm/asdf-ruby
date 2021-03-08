@@ -36,7 +36,7 @@ RUBY_CONFIGURE_OPTS="--with-openssl-dir=$(brew --prefix openssl@1.1)" asdf insta
 ```
 
 ```sh
-RUBY_CONFIGURE_OPTS="--enable-shared --enable-dtrace CFLAGS="-O3"" asdf install ruby 2.4.0
+RUBY_CONFIGURE_OPTS="--disable-install-doc" asdf install ruby 3.0.0
 ```
 
 By default asdf-ruby uses the latest release of ruby-install, but you can choose your own branch/tag through the `ASDF_RUBY_INSTALL_VERSION` variable:
