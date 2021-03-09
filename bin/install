@@ -25,8 +25,8 @@ install_ruby() {
     patches=" --patch $RUBY_APPLY_PATCHES "
   fi
 
-  if [[ -n "${RUBY_BUILD_OPTS:-}" ]]; then
-    opts="-- $RUBY_BUILD_OPTS"
+  if [[ -n "${RUBY_CONFIGURE_OPTS:-}" ]]; then
+    opts="-- $RUBY_CONFIGURE_OPTS"
   fi
 
   local command="$(ruby_install_path) --no-reinstall --cleanup --src-dir "$ASDF_DOWNLOAD_PATH" --install-dir "$install_path""$patches""$version" "$opts""
