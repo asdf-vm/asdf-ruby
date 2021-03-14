@@ -16,8 +16,7 @@ ensure_ruby_install_installed() {
       current_ruby_install_version="v$("$(ruby_install_path)" --version | cut -d ' ' -f2)"
       # Check if expected version matches current version
       if [ "$current_ruby_install_version" != "$RUBY_INSTALL_VERSION" ]; then
-        # If not reinstall and checkout ASDF_RUBY_INSTALL_VERSION
-        rm -rf "$(ruby_install_dir)"
+        # If not, reinstall with ASDF_RUBY_INSTALL_VERSION
         download_ruby_install
       fi
     fi
@@ -30,20 +29,21 @@ ensure_ruby_install_installed() {
 
 
 download_ruby_install() {
+  # Remove directory in case it still exists from last download
+  rm -rf "$(ruby_install_source_dir)"
+  rm -rf "$(ruby_install_dir)"
   # Print to stderr so asdf doesn't assume this string is a list of versions
   echoerr "Downloading ruby-install $RUBY_INSTALL_VERSION"
-  local build_dir="$(ruby_install_source_dir)"
 
-  # Remove directory in case it still exists from last download
-  rm -rf "$build_dir"
+
 
   # Clone down and checkout the correct ruby-install version
-  git clone https://github.com/postmodern/ruby-install.git "$build_dir" --quiet
-  (cd "$build_dir"; git checkout $RUBY_INSTALL_VERSION --quiet;)
+  git clone https://github.com/postmodern/ruby-install.git "$(ruby_install_source_dir)" --quiet
+  (cd "$(ruby_install_source_dir)"; git checkout $RUBY_INSTALL_VERSION --quiet;)
 
-  echo "$(cd $build_dir; PREFIX=$(ruby_install_dir) make install)" 2>&1 >/dev/null
+  echo "$(cd $(ruby_install_source_dir); PREFIX=$(ruby_install_dir) make install)" 2>&1 >/dev/null
 
-  rm -rf "$build_dir"
+  rm -rf "$(ruby_install_source_dir)"
 }
 
 asdf_ruby_plugin_path() {
