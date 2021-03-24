@@ -4,10 +4,11 @@ set -euo pipefail
 
 # shellcheck source=../lib/utils.sh
 source "$(dirname $0)/../lib/utils.sh"
+ensure_ruby_install_setup
 
 list_versions() {
-  ensure_ruby_install_setup
-  echo $($(ruby_install_path))
+
+  echo $($(ruby_install_executable))
 }
 
 list_versions
