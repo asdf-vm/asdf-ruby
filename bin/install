@@ -8,16 +8,28 @@ ensure_ruby_install_setup
 
 install_ruby() {
 
-  local install_type=$1
-  local version=$2
-  local install_path=$3
 
-  if [ "$install_type" != "version" ]; then
+  if [ "$ASDF_INSTALL_TYPE" != "version" ]; then
     printerr "Cannot install specific ref from source, sorry."
     printerr "For a list of available versions, see \`asdf list-all ruby\`"
     exit 1
   fi
 
+  if [ -z "${RUBY_APPLY_PATCHES:-}" ] && [ -z "${RUBY_CONFIGURE_OPTS:-}"] && [ -z "${ASDF_RUBY_FROM_SOURCE:-}" ] && os_name="$(get_macos_marketing_name)"; then
+    if download_url="$(macos_get_download_url $os_name)"; then
+      macos_install_from_prebuilt "$download_url"
+    else
+      printf 'Fallback to building from source. \n'
+      install_from_source
+    fi
+  else
+    install_from_source
+  fi
+
+
+}
+
+install_from_source() {
   local opts=""
   local patches=" "
 
@@ -29,10 +41,61 @@ install_ruby() {
     opts="-- $RUBY_CONFIGURE_OPTS"
   fi
 
-  local command="$(ruby_install_executable) --no-reinstall --cleanup --src-dir "$ASDF_DOWNLOAD_PATH" --install-dir "$install_path""$patches""$version" "$opts""
+  local command="$(ruby_install_executable) --no-reinstall --cleanup --src-dir "$ASDF_DOWNLOAD_PATH" --install-dir "$ASDF_INSTALL_PATH""$patches""$ASDF_INSTALL_VERSION" "$opts""
   echo "$command"
   echo $($command)
 }
+
+macos_install_from_prebuilt() {
+  #macos_check_homebrew_setup
+  mkdir -p "$ASDF_INSTALL_PATH"
+  mkdir -p "$ASDF_DOWNLOAD_PATH"
+
+
+  local tmp_path="$HOME/.asdf/tmp/$(plugin_name)/extracted/$ASDF_INSTALL_VERSION"
+  mkdir -p "$tmp_path"
+
+
+  local download_url="$1"
+
+  printf 'Downloading %s. \n' "$download_url"
+
+  curl -L "$download_url" | tar xzf - -C "$tmp_path" --strip-components=2
+
+
+  # We're not keeping the same directory structure as Homebrew.
+  local replacement_cellar_pattern="@@HOMEBREW_CELLAR@@/ruby/$ASDF_INSTALL_VERSION"
+
+  # Replace the homebrew URL with something compatible with asdf
+  grep -rlI --null "$replacement_cellar_pattern" "$tmp_path" | xargs -0 sed -i '' "s:$replacement_cellar_pattern:$ASDF_INSTALL_PATH:g"
+
+  local replacement_prefix_pattern="@@HOMEBREW_PREFIX@@"
+
+  # Replace the homebrew URL with something compatible with asdf
+  grep -rlI --null "$replacement_prefix_pattern" "$tmp_path" | xargs -0 sed -i '' "s:$replacement_prefix_pattern:$ASDF_INSTALL_PATH:g"
+
+ local pattern="@@HOMEBREW_CELLAR@@"
+ local linked_libs=()
+  while IFS= read -r -d '' file_path; do
+    linked_libs+=("$file_path")
+  done < <(grep -rl --null "$pattern" "$tmp_path") 
+      
+  macos_update_linked_paths "${linked_libs[@]}"
+
+  mv -f "$tmp_path/"* "$ASDF_INSTALL_PATH"
+
+  local lib_rubies=("$ASDF_INSTALL_PATH/lib/libruby."*".dylib")
+  
+  for lib_ruby in "${lib_rubies[@]}"; do
+    echo "$lib_ruby"
+    $(install_name_tool -id "$lib_ruby" "$lib_ruby")
+    cp "$lib_ruby" "$lib_ruby.backup"
+    codesign -s - -f -vvvvvv "$lib_ruby.backup"
+    mv -f "$lib_ruby.backup" "$lib_ruby"
+  done
+
+}
+
 
 
 install_default_gems() {
@@ -78,5 +141,5 @@ install_default_gems() {
   done < "$default_gems"
 }
 
-install_ruby "$ASDF_INSTALL_TYPE" "$ASDF_INSTALL_VERSION" "$ASDF_INSTALL_PATH"
+install_ruby 
 install_default_gems

@@ -3,10 +3,13 @@
 current_script_path=${BASH_SOURCE[0]}
 ruby_plugin_dir=$(dirname "$(dirname "$current_script_path")")
 
+load_os=("$install_path/lib/ruby/$version/"*"-darwin19")
+export LOAD_PATH="${load_os[@]}:$install_path/lib/ruby/$version:$LOAD_PATH"
+
 if [ "$RUBYLIB" = "" ]; then
-  export RUBYLIB="$ruby_plugin_dir/rubygems-plugin"
+  export RUBYLIB="$LOAD_PATH:$ruby_plugin_dir/rubygems-plugin"
 else
-  export RUBYLIB="$ruby_plugin_dir/rubygems-plugin:$RUBYLIB"
+  export RUBYLIB="$LOAD_PATH:$ruby_plugin_dir/rubygems-plugin:$RUBYLIB"
 fi
 
 export PATH=$install_path/bin:$PATH
