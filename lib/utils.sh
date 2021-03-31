@@ -1,4 +1,4 @@
-  export RUBY_INSTALL_VERSION="${ASDF_RUBY_INSTALL_VERSION:-v0.8.1}"
+export RUBY_INSTALL_VERSION="${ASDF_RUBY_INSTALL_VERSION:-v0.8.1}"
 
 printerr() {
   >&2 printf '\033[0;31m%s\033[0m \n' "$1"
