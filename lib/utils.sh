@@ -1,7 +1,7 @@
   export RUBY_INSTALL_VERSION="${ASDF_RUBY_INSTALL_VERSION:-v0.8.1}"
 
-echoerr() {
-  >&2 echo -e "\033[0;31m$1\033[0m"
+printerr() {
+  >&2 printf '\033[0;31m%s\033[0m \n' "$1"
 }
 
 ensure_ruby_install_setup() {
@@ -33,7 +33,7 @@ download_ruby_install() {
   rm -rf "$(ruby_install_source_path)"
   rm -rf "$(ruby_install_path)"
   # Print to stderr so asdf doesn't assume this string is a list of versions
-  echoerr "Downloading ruby-install $RUBY_INSTALL_VERSION"
+  printerr "Downloading ruby-install $RUBY_INSTALL_VERSION"
 
 
 

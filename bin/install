@@ -13,8 +13,8 @@ install_ruby() {
   local install_path=$3
 
   if [ "$install_type" != "version" ]; then
-    echoerr "Cannot install specific ref from source, sorry."
-    echoerr "For a list of available versions, see \`asdf list-all ruby\`"
+    printerr "Cannot install specific ref from source, sorry."
+    printerr "For a list of available versions, see \`asdf list-all ruby\`"
     exit 1
   fi
 
