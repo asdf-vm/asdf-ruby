@@ -45,6 +45,8 @@ pry
 gem-ctags
 ```
 
+You can specify a non-default location of this file by setting a `ASDF_GEM_DEFAULT_PACKAGES_FILE` variable.
+
 ## Migrating from another Ruby version manager
 
 ### `.ruby-version` file
