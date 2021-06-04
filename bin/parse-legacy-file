@@ -6,7 +6,7 @@ get_legacy_version() {
 
   if [ "$basename" == "Gemfile" ]; then
     RUBY_VERSION=$(grep '^\s*ruby' "$current_file" |
-      sed -e 's/[[:space:]]/ /g' -e 's/#.*//' \
+      sed -e 's/[[:space:]]/ /g' -e 's/#.*//' -e 's/[()]//' \
       -e 's/engine:/:engine =>/' -e 's/engine_version:/:engine_version =>/' \
       -e "s/.*:engine *=> *['\"]\([^'\"]*\).*:engine_version *=> *['\"]\([^'\"]*\).*/\2__ENGINE__\1/" \
       -e "s/.*:engine_version *=> *['\"]\([^'\"]*\).*:engine *=> *['\"]\([^'\"]*\).*/\1__ENGINE__\2/" \
