@@ -20,12 +20,43 @@ When installing Ruby using `asdf install`, you can pass custom configure options
 
 Under the hood, asdf-ruby uses [ruby-build](https://github.com/rbenv/ruby-build) to build and install Ruby, check its [README](https://github.com/rbenv/ruby-build/blob/master/README.md) for more information about build options and the [troubleshooting](https://github.com/rbenv/ruby-build/wiki#troubleshooting) wiki section for any issues encountered during installation of ruby versions.
 
+### Patches
+
 You may also apply custom patches before building with `RUBY_APPLY_PATCHES`, e.g.
 
 ```
 RUBY_APPLY_PATCHES=$'dir/1.patch\n2.patch\nhttp://example.com/3.patch' asdf install ruby 2.4.1
 RUBY_APPLY_PATCHES=$(curl -s https://raw.githubusercontent.com/rvm/rvm/master/patchsets/ruby/2.1.1/railsexpress) asdf install ruby 2.1.1
 ```
+
+If you're maintaining multiple versions of Ruby with version specific patches, you
+can use `RUBY_APPLY_VERSION_PATCHES` to specify which patches should be applied
+to specific Ruby versions:
+
+```
+RUBY_APPLY_VERSION_PATCHES=$'<ruby_version1>=<patch_path1>,<patch_path2>\n<ruby_version2>=<patch_path1>,<patch_path2>'
+```
+
+For example:
+
+```
+export RUBY_APPLY_VERSION_PATCHES=$'2.4.1=/tmp/2.4.1_1.patch,/tmp/2.4.1_2.patch\n2.1.1=http://example.com/3.patch'
+
+asdf install ruby 2.4.1
+asdf install ruby 2.1.1
+```
+
+The ability to specify multiple, version specific patches is most useful when
+used in conjuction with a `.tool-versions` file such as:
+
+```
+ruby 2.4.1 2.1.1
+```
+
+With `RUBY_APPLY_VERSION_PATCHES` already exported, running an `asdf install`
+will now ensure the correct version specific patches are applied as needed.
+
+### ruby-build version
 
 By default asdf-ruby uses the latest release of ruby-build, but you can choose your own branch/tag through the `ASDF_RUBY_BUILD_VERSION` variable:
 
