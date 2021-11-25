@@ -30,8 +30,19 @@ install_ruby() {
     opts="$opts $RUBY_BUILD_OPTS"
   fi
 
+  matching_version=$(is_version_valid "$version")
+
+  if [[ -n "$matching_version" ]]; then
+    errorexit "Version not found"
+  fi
+
   # shellcheck disable=SC2086
   echo "$patches" | $(ruby_build_path) ${opts} "$version" "$install_path"
+}
+
+is_version_valid() {
+  version=$1
+  "$(ruby_build_path)" --definitions | grep -v "topaz-dev" | grep "$version" -
 }
 
 fetch_patches() {

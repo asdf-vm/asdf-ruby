@@ -5,6 +5,11 @@ echoerr() {
   >&2 echo -e "\033[0;31m$1\033[0m"
 }
 
+errorexit() {
+  echoerr "$1"
+  exit 1
+}
+
 ensure_ruby_build_setup() {
   ensure_ruby_build_installed
 }
