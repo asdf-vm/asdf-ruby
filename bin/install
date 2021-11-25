@@ -32,7 +32,7 @@ install_ruby() {
 
   matching_version=$(is_version_valid "$version")
 
-  if [[ -n "$matching_version" ]]; then
+  if [[ -z "$matching_version" ]]; then
     errorexit "Version not found"
   fi
 
