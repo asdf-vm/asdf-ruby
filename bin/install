@@ -30,7 +30,9 @@ install_ruby() {
     opts="$opts $RUBY_BUILD_OPTS"
   fi
 
+  set +e
   matching_version=$(is_version_valid "$version")
+  set -e
 
   if [[ -z "$matching_version" ]]; then
     errorexit "Version not found"
