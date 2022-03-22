@@ -9,4 +9,6 @@ else
   export RUBYLIB="$ruby_plugin_dir/rubygems-plugin:$RUBYLIB"
 fi
 
-export PATH=$install_path/bin:$PATH
+if [ "${install_path}" ]; then
+    export PATH=$install_path/bin:$PATH
+fi
