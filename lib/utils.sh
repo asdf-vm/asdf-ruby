@@ -15,7 +15,7 @@ ensure_ruby_build_setup() {
 }
 
 ensure_ruby_build_installed() {
-    local ruby_build_version
+    local current_ruby_build_version
 
     if [ ! -f "$(ruby_build_path)" ]; then
         download_ruby_build
