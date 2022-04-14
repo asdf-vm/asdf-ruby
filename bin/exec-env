@@ -9,5 +9,3 @@ if [ "$RUBYLIB" = "" ]; then
 else
   export RUBYLIB="$ruby_plugin_dir/rubygems-plugin:$RUBYLIB"
 fi
-
-export PATH=$ASDF_INSTALL_PATH/bin:$PATH
