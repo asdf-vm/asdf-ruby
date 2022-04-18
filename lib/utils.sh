@@ -44,8 +44,8 @@ download_ruby_build() {
     rm -rf $build_dir
 
     # Clone down and checkout the correct ruby-build version
-    git clone https://github.com/rbenv/ruby-build.git $build_dir >/dev/null
-    (cd $build_dir; git checkout $RUBY_BUILD_TAG >/dev/null)
+    git clone https://github.com/rbenv/ruby-build.git $build_dir >/dev/null 2>&1
+    (cd $build_dir; git checkout $RUBY_BUILD_TAG >/dev/null 2>&1)
 
     # Install in the ruby-build dir
     PREFIX="$(ruby_build_dir)" $build_dir/install.sh
