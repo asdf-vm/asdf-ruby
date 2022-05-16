@@ -2,10 +2,10 @@
 
 get_legacy_version() {
   current_file="$1"
-  basename=$(basename -- "$current_file")
+  basename="$(basename -- "$current_file")"
 
   if [ "$basename" == "Gemfile" ]; then
-    RUBY_VERSION=$(grep '^\s*ruby' "$current_file" |
+    RUBY_VERSION="$(grep '^\s*ruby' "$current_file" |
       sed -e 's/[[:space:]]/ /g' -e 's/#.*//' -e 's/[()]//' \
       -e 's/engine:/:engine =>/' -e 's/engine_version:/:engine_version =>/' \
       -e "s/.*:engine *=> *['\"]\([^'\"]*\).*:engine_version *=> *['\"]\([^'\"]*\).*/\2__ENGINE__\1/" \
@@ -13,13 +13,13 @@ get_legacy_version() {
       -e "s/ *ruby *['\"]\([^'\"]*\).*/\1/" \
       -e "/^[^0-9]/d" \
       -e "s/\(.*\)__ENGINE__\(.*\)/\2-\1/" |
-      head -1)
+      head -1)"
   elif [ "$basename" == ".ruby-version" ]; then
     # Get version from .ruby-version file (filters out 'ruby-' prefix if it exists).
     # The .ruby-version is used by rbenv and now rvm.
-    ruby_version=$(cat "$current_file")
+    ruby_version="$(cat "$current_file")"
     ruby_prefix="ruby-"
-    RUBY_VERSION=${ruby_version/#$ruby_prefix}
+    RUBY_VERSION="${ruby_version/#$ruby_prefix}"
   fi
 
   echo "$RUBY_VERSION"

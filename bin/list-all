@@ -3,7 +3,7 @@
 set -euo pipefail
 
 # shellcheck source=../lib/utils.sh
-source "$(dirname $0)/../lib/utils.sh"
+source "$(dirname "$0")/../lib/utils.sh"
 
 list_versions() {
   ensure_ruby_build_setup

@@ -3,14 +3,14 @@
 set -euo pipefail
 
 # shellcheck source=../lib/utils.sh
-source "$(dirname $0)/../lib/utils.sh"
+source "$(dirname "$0")/../lib/utils.sh"
 
 install_ruby() {
   ensure_ruby_build_setup
 
-  local install_type=$1
-  local version=$2
-  local install_path=$3
+  local install_type="$1"
+  local version="$2"
+  local install_path="$3"
 
   if [ "$install_type" != "version" ]; then
     echoerr "Cannot install specific ref from source, sorry."
@@ -31,7 +31,7 @@ install_ruby() {
   fi
 
   set +e
-  matching_version=$(is_version_valid "$version")
+  matching_version="$(is_version_valid "$version")"
   set -e
 
   if [[ -z "$matching_version" ]]; then
@@ -39,7 +39,7 @@ install_ruby() {
   fi
 
   # shellcheck disable=SC2086
-  echo "$patches" | $(ruby_build_path) ${opts} "$version" "$install_path"
+  echo "$patches" | "$(ruby_build_path)" ${opts} "$version" "$install_path"
 }
 
 is_version_valid() {
@@ -68,10 +68,10 @@ get_absolute_path() {
   local rel_dir
   local rel_base
 
-  start_dir=$(pwd)
-  rel_path=$1
-  rel_dir=$(dirname "$rel_path")
-  rel_base=$(basename "$rel_path")
+  start_dir="$(pwd)"
+  rel_path="$1"
+  rel_dir="$(dirname "$rel_path")"
+  rel_base="$(basename "$rel_path")"
 
   (
     cd "$start_dir" \
@@ -116,7 +116,7 @@ install_default_gems() {
 
     echo -n "Running: gem install $gem_name ${args[@]:-} ... "
 
-    if output=$($gem install "$gem_name" "${args[@]+"${args[@]}"}" 2>&1); then
+    if output=$("$gem" install "$gem_name" "${args[@]+"${args[@]}"}" 2>&1); then
       echo -e "SUCCESS"
     else
       echo -e "FAIL: $output"

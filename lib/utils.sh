@@ -41,17 +41,17 @@ download_ruby_build() {
     local build_dir="$(ruby_build_source_dir)"
 
     # Remove directory in case it still exists from last download
-    rm -rf $build_dir
+    rm -rf "$build_dir"
 
     # Clone down and checkout the correct ruby-build version
-    git clone https://github.com/rbenv/ruby-build.git $build_dir >/dev/null 2>&1
-    (cd $build_dir; git checkout $RUBY_BUILD_TAG >/dev/null 2>&1)
+    git clone https://github.com/rbenv/ruby-build.git "$build_dir" >/dev/null 2>&1
+    (cd "$build_dir"; git checkout "$RUBY_BUILD_TAG" >/dev/null 2>&1)
 
     # Install in the ruby-build dir
-    PREFIX="$(ruby_build_dir)" $build_dir/install.sh
+    PREFIX="$(ruby_build_dir)" "$build_dir/install.sh"
 
     # Remove ruby-build source dir
-    rm -rf $build_dir
+    rm -rf "$build_dir"
 }
 
 asdf_ruby_plugin_path() {
