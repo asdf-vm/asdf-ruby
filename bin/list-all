@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-# shellcheck source=../lib/utils.sh
+# shellcheck source=/dev/null
 source "$(dirname "$0")/../lib/utils.sh"
 
 list_versions() {
