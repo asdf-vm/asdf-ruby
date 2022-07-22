@@ -1,6 +1,6 @@
 # asdf-ruby
 
-[![Build Status](https://travis-ci.org/asdf-vm/asdf-ruby.svg?branch=master)](https://travis-ci.org/asdf-vm/asdf-ruby)
+[![Build Status](https://github.com/asdf-vm/asdf-ruby/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/asdf-vm/asdf-ruby/actions/workflows/ci.yml?query=branch%3Amaster++)
 
 Ruby plugin for [asdf](https://github.com/asdf-vm/asdf) version manager
 

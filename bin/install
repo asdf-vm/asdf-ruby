@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-# shellcheck source=../lib/utils.sh
+# shellcheck source=/dev/null
 source "$(dirname "$0")/../lib/utils.sh"
 
 install_ruby() {
@@ -114,6 +114,7 @@ install_default_gems() {
       args=()
     fi
 
+    # shellcheck disable=SC2145
     echo -n "Running: gem install $gem_name ${args[@]:-} ... "
 
     if output=$("$gem" install "$gem_name" "${args[@]+"${args[@]}"}" 2>&1); then
