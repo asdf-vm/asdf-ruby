@@ -20,6 +20,8 @@ When installing Ruby using `asdf install`, you can pass custom configure options
 
 Under the hood, asdf-ruby uses [ruby-build](https://github.com/rbenv/ruby-build) to build and install Ruby, check its [README](https://github.com/rbenv/ruby-build/blob/master/README.md) for more information about build options and the [troubleshooting](https://github.com/rbenv/ruby-build/wiki#troubleshooting) wiki section for any issues encountered during installation of ruby versions.
 
+Running `asdf plugin-update ruby` will update asdf-ruby and ensure the latest versions of ruby are available to install.
+
 You may also apply custom patches before building with `RUBY_APPLY_PATCHES`, e.g.
 
 ```
