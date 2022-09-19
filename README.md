@@ -20,8 +20,6 @@ When installing Ruby using `asdf install`, you can pass custom configure options
 
 Under the hood, asdf-ruby uses [ruby-build](https://github.com/rbenv/ruby-build) to build and install Ruby, check its [README](https://github.com/rbenv/ruby-build/blob/master/README.md) for more information about build options and the [troubleshooting](https://github.com/rbenv/ruby-build/wiki#troubleshooting) wiki section for any issues encountered during installation of ruby versions.
 
-Running `asdf plugin-update ruby` will update asdf-ruby and ensure the latest versions of ruby are available to install.
-
 You may also apply custom patches before building with `RUBY_APPLY_PATCHES`, e.g.
 
 ```
@@ -29,7 +27,7 @@ RUBY_APPLY_PATCHES=$'dir/1.patch\n2.patch\nhttp://example.com/3.patch' asdf inst
 RUBY_APPLY_PATCHES=$(curl -s https://raw.githubusercontent.com/rvm/rvm/master/patchsets/ruby/2.1.1/railsexpress) asdf install ruby 2.1.1
 ```
 
-By default asdf-ruby uses the latest release of ruby-build, but you can choose your own branch/tag through the `ASDF_RUBY_BUILD_VERSION` variable:
+Running `asdf plugin-update ruby` will update asdf-ruby and ensure the latest versions of ruby are available to install. By default asdf-ruby uses the latest release of ruby-build, however instead you can choose your own branch/tag through the `ASDF_RUBY_BUILD_VERSION` variable:
 
 ```
 ASDF_RUBY_BUILD_VERSION=master asdf install ruby 2.6.4
