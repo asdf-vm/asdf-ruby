@@ -10,7 +10,7 @@ Ruby plugin for [asdf](https://github.com/asdf-vm/asdf) version manager
 asdf plugin add ruby https://github.com/asdf-vm/asdf-ruby.git
 ```
 
-Please make sure you have the required [system dependencies](https://github.com/rbenv/ruby-build/wiki#suggested-build-environment) installed before trying to install Ruby.
+Please make sure you have the required [system dependencies](https://github.com/rbenv/ruby-build/wiki#suggested-build-environment) installed before trying to install Ruby. It is also recommended that you [remove other ruby version managers before using asdf-ruby](#troubleshooting)
 
 ## Use
 
@@ -61,3 +61,22 @@ find out what version of Ruby should be used. To do this, add the following to
 If you are migrating from version manager that supported fuzzy matching in `.ruby-version`
 like [rvm](https://github.com/rvm/rvm) or [chruby](https://github.com/postmodern/chruby),
 note that you might have to change `.ruby-version` to include full version (e.g. change `2.6` to `2.6.1`).
+
+## Troubleshooting
+
+If you are moving to asdf-ruby from another Ruby version manager, it is recommended to completely uninstall the old Ruby version manager before installing asdf-ruby.
+
+If you install asdf and asdf-ruby and it doesn't make `ruby` and `irb` available in your shell double check that you have installed asdf correctly. Make sure you have [system dependencies](https://github.com/rbenv/ruby-build/wiki#suggested-build-environment) installed BEFORE running `asdf install ruby <version>`. After installing a Ruby with asdf, run `type -a ruby` to see what rubies are currently on your `$PATH`. The asdf `ruby` shim should be listed first, if it is not asdf is not installed correctly.
+
+Correct output from `type -a ruby` (asdf shim is first in the list):
+
+```
+ruby is /Users/someone/.asdf/shims/ruby
+ruby is /usr/bin/ruby
+```
+
+Incorrect output `type -a ruby`:
+
+```
+ruby is /usr/bin/ruby
+```
