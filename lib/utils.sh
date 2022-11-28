@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 
-RUBY_BUILD_VERSION="${ASDF_RUBY_BUILD_VERSION:-v20221124}"
+RUBY_BUILD_VERSION="${ASDF_RUBY_BUILD_VERSION:-}"
+if [ "$RUBY_BUILD_VERSION" = "" ]; then
+  RUBY_BUILD_VERSION="$(
+    curl --silent "https://api.github.com/repos/rbenv/ruby-build/releases/latest" |
+    grep '"tag_name":' |
+    sed -E 's/.*"([^"]+)".*/\1/'
+  )"
+fi
 RUBY_BUILD_TAG="$RUBY_BUILD_VERSION"
 
 echoerr() {
@@ -26,7 +33,7 @@ ensure_ruby_build_installed() {
         # If ruby-build version does not start with 'v',
         # add 'v' to beginning of version
         # shellcheck disable=SC2086
-        if [ ${current_ruby_build_version:0:1} != "v" ]; then
+        if [ "${current_ruby_build_version:0:1}" != "v" ]; then
           current_ruby_build_version="v$current_ruby_build_version"
         fi
         if [ "$current_ruby_build_version" != "$RUBY_BUILD_VERSION" ]; then
