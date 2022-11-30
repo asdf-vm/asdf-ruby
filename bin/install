@@ -51,15 +51,15 @@ fetch_patches() {
   while read -r line; do
     if [ "$line" = "" ]; then continue; fi
     if [[ "$line" =~ ^[Hh][Tt][Tt][Pp][Ss]?:// ]]; then
-      >&2 echo "Using patch from URL: $line"
+      echo >&2 "Using patch from URL: $line"
       curl -fSs "$line" || exit 1
     else
       local abs_path
       abs_path="$(get_absolute_path "$line")"
-      >&2 echo "Using local patch: $abs_path"
+      echo >&2 "Using local patch: $abs_path"
       cat "$abs_path" || exit 1
     fi
-  done <<< "$@"
+  done <<<"$@"
 }
 
 get_absolute_path() {
@@ -74,10 +74,10 @@ get_absolute_path() {
   rel_base="$(basename "$rel_path")"
 
   (
-    cd "$start_dir" \
-      && cd "$rel_dir" 2>/dev/null \
-      && echo "$(pwd)/$rel_base" \
-      || echo "$rel_path"
+    cd "$start_dir" &&
+      cd "$rel_dir" 2>/dev/null &&
+      echo "$(pwd)/$rel_base" ||
+      echo "$rel_path"
   )
 }
 
@@ -87,7 +87,7 @@ install_default_gems() {
   local gem="${ASDF_INSTALL_PATH}/bin/gem"
 
   if [ ! -f "$default_gems" ]; then
-    return;
+    return
   fi
 
   echo ""
@@ -107,9 +107,9 @@ install_default_gems() {
     gem_version="${line[1]-}"
 
     if [ "$gem_version" == "--pre" ]; then
-      args=( --pre )
+      args=(--pre)
     elif [ -n "$gem_version" ]; then
-      args=( --version "$gem_version" )
+      args=(--version "$gem_version")
     else
       args=()
     fi
@@ -122,7 +122,7 @@ install_default_gems() {
     else
       echo -e "FAIL: $output"
     fi
-  done < "$default_gems"
+  done <"$default_gems"
 }
 
 install_ruby "$ASDF_INSTALL_TYPE" "$ASDF_INSTALL_VERSION" "$ASDF_INSTALL_PATH"
