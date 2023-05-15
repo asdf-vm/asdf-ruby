@@ -35,7 +35,7 @@ install_ruby() {
   set -e
 
   if [[ -z "$matching_version" ]]; then
-    errorexit "Version not found"
+    errorexit "Version not found\n\nIf this is a new Ruby version, you may need to update the plugin:\nasdf plugin update ruby"
   fi
 
   # shellcheck disable=SC2086
