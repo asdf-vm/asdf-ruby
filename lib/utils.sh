@@ -1,4 +1,4 @@
-6#!/usr/bin/env bash
+#!/usr/bin/env bash
 
 RUBY_BUILD_VERSION="${ASDF_RUBY_BUILD_VERSION:-v20231114}"
 RUBY_BUILD_TAG="$RUBY_BUILD_VERSION"
