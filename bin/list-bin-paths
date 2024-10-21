@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+gem_version="${ASDF_INSTALL_VERSION%.*}.0"
+echo "bin lib/ruby/gems/$gem_version/bin"
