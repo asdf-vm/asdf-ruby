@@ -95,7 +95,7 @@ install_default_gems() {
   # Parsing of .default-gems was originally lifted from rbenv-default-gems
   # which is Copyright (c) 2013 Sam Stephenson
   # https://github.com/rbenv/rbenv-default-gems/blob/ead6788/LICENSE
-  while IFS=" " read -r -a line || [ -n "$line" ]; do
+  while IFS=" " read -r -a line; do
 
     # Skip empty lines.
     [ "${#line[@]}" -gt 0 ] || continue
@@ -122,7 +122,12 @@ install_default_gems() {
     else
       echo -e "FAIL: $output"
     fi
-  done <"$default_gems"
+    # echo here adds trailing newline, which is necessary if file lacks one,
+    # empty lines are already skipped some multiple trailing newlines are not a problem.
+  done < <(
+    cat "$default_gems"
+    echo
+  )
 }
 
 install_ruby "$ASDF_INSTALL_TYPE" "$ASDF_INSTALL_VERSION" "$ASDF_INSTALL_PATH"
