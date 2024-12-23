@@ -95,7 +95,7 @@ install_default_gems() {
   # Parsing of .default-gems was originally lifted from rbenv-default-gems
   # which is Copyright (c) 2013 Sam Stephenson
   # https://github.com/rbenv/rbenv-default-gems/blob/ead6788/LICENSE
-  while IFS=" " read -r -a line; do
+  while IFS=" " read -r -a line || [ -n "$line" ]; do
 
     # Skip empty lines.
     [ "${#line[@]}" -gt 0 ] || continue
