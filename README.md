@@ -27,7 +27,8 @@ RUBY_APPLY_PATCHES=$'dir/1.patch\n2.patch\nhttp://example.com/3.patch' asdf inst
 RUBY_APPLY_PATCHES=$(curl -s https://raw.githubusercontent.com/rvm/rvm/master/patchsets/ruby/2.1.1/railsexpress) asdf install ruby 2.1.1
 ```
 
-> **_NOTE:_**  This plugin does not automatically fetch new Ruby versions. Running `asdf plugin-update ruby` will update asdf-ruby and ensure the latest versions of Ruby are available to install.
+> [!NOTE]
+> This plugin does not automatically fetch new Ruby versions. Running `asdf plugin-update ruby` will update asdf-ruby and ensure the latest versions of Ruby are available to install.
 
 By default asdf-ruby uses a recent release of ruby-build, however instead you can choose your own branch/tag through the `ASDF_RUBY_BUILD_VERSION` variable:
 
@@ -66,7 +67,8 @@ note that you might have to change `.ruby-version` to include full version (e.g.
 
 ## Troubleshooting
 
-> **_NOTE:_**  The most common issue reported for this plugin is a missing Ruby version. If you are not seeing a recent Ruby version in the list of available Ruby versions it's likely due to having an older version of this plugin. Run `asdf plugin-update ruby` to get the most recent list of Ruby versions.
+> [!NOTE]
+> The most common issue reported for this plugin is a missing Ruby version. If you are not seeing a recent Ruby version in the list of available Ruby versions it's likely due to having an older version of this plugin. Run `asdf plugin-update ruby` to get the most recent list of Ruby versions.
 
 If you are moving to asdf-ruby from another Ruby version manager, it is recommended to completely uninstall the old Ruby version manager before installing asdf-ruby.
 
