@@ -28,7 +28,7 @@ RUBY_APPLY_PATCHES=$(curl -s https://raw.githubusercontent.com/rvm/rvm/master/pa
 ```
 
 > [!NOTE]
-> This plugin does not automatically fetch new Ruby versions. Running `asdf plugin-update ruby` will update asdf-ruby and ensure the latest versions of Ruby are available to install.
+> This plugin does not automatically fetch new Ruby versions. Running `asdf plugin update ruby` will update asdf-ruby and ensure the latest versions of Ruby are available to install.
 
 By default asdf-ruby uses a recent release of ruby-build, however instead you can choose your own branch/tag through the `ASDF_RUBY_BUILD_VERSION` variable:
 
