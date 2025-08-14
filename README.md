@@ -28,7 +28,7 @@ RUBY_APPLY_PATCHES=$(curl -s https://raw.githubusercontent.com/rvm/rvm/master/pa
 ```
 
 > [!NOTE]
-> This plugin does not automatically fetch new Ruby versions. Running `asdf plugin update ruby` will update asdf-ruby and ensure the latest versions of Ruby are available to install.
+> This plugin does not automatically fetch new Ruby versions. Running `asdf plugin update ruby` will update asdf-ruby and ensure the latest versions of Ruby are available to install. If the desired ruby version is still not showing up see the below [Troubleshooting](https://github.com/asdf-vm/asdf-ruby?tab=readme-ov-file#troubleshooting) section.
 
 By default asdf-ruby uses a recent release of ruby-build, however instead you can choose your own branch/tag through the `ASDF_RUBY_BUILD_VERSION` variable:
 
@@ -68,7 +68,7 @@ note that you might have to change `.ruby-version` to include full version (e.g.
 ## Troubleshooting
 
 > [!NOTE]
-> The most common issue reported for this plugin is a missing Ruby version. If you are not seeing a recent Ruby version in the list of available Ruby versions it's likely due to having an older version of this plugin. Run `asdf plugin-update ruby` to get the most recent list of Ruby versions.
+> The most common issue reported for this plugin is a missing Ruby version. If you are not seeing a recent Ruby version in the list of available Ruby versions it's likely due to having an older version of this plugin. Run `asdf plugin update ruby` to get the most recent list of Ruby versions. If it is still not showing up then this plugin's `RUBY_BUILD_VERSION` in lib/utils.sh likely needs updated with the latest ruby-build release https://github.com/rbenv/ruby-build/releases. Please check for an existing PR before submitting a new one. If there is not one, please fork the repo and submit one. If this plugin's ruby-build needs updated, you can workaround it with `ASDF_RUBY_BUILD_VERSION`. A note in the above [Use](https://github.com/asdf-vm/asdf-ruby?tab=readme-ov-file#use) section describes how to do this.  
 
 If you are moving to asdf-ruby from another Ruby version manager, it is recommended to completely uninstall the old Ruby version manager before installing asdf-ruby.
 
