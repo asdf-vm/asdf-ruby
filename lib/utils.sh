@@ -85,17 +85,6 @@ ruby_build_path() {
   echo "$(ruby_build_dir)/bin/ruby-build"
 }
 
-ruby_build_version_cache_path() {
-  echo "$(asdf_ruby_plugin_path)/.ruby-build-version-cache"
-}
-
-# Get file modification time in seconds since epoch (cross-platform)
-get_file_mtime() {
-  local file="$1"
-  # Try GNU stat first (Linux), then BSD stat (macOS)
-  stat -c %Y "$file" 2>/dev/null || stat -f %m "$file" 2>/dev/null
-}
-
 # Fetch the latest ruby-build version tag from GitHub
 fetch_latest_ruby_build_version() {
   git ls-remote --tags --sort=-version:refname https://github.com/rbenv/ruby-build.git 2>/dev/null |
@@ -104,8 +93,8 @@ fetch_latest_ruby_build_version() {
     sed 's|refs/tags/||'
 }
 
-# Get the ruby-build version to use, with caching
-# Priority: ASDF_RUBY_BUILD_VERSION env var > cached latest > fetched latest > installed version
+# Get the ruby-build version to use
+# Priority: ASDF_RUBY_BUILD_VERSION env var > fetched latest > installed version
 get_ruby_build_version() {
   # If user explicitly set a version, use that
   if [ -n "${ASDF_RUBY_BUILD_VERSION:-}" ]; then
@@ -113,29 +102,11 @@ get_ruby_build_version() {
     return 0
   fi
 
-  local cache_file
-  cache_file="$(ruby_build_version_cache_path)"
-
-  # Check cache first (unless ASDF_RUBY_BUILD_CACHE_CLEAR is set)
-  if [ -z "${ASDF_RUBY_BUILD_CACHE_CLEAR:-}" ] && [ -f "$cache_file" ]; then
-    local cache_mtime current_time age
-    cache_mtime="$(get_file_mtime "$cache_file")"
-    current_time="$(date +%s)"
-    age=$((current_time - cache_mtime))
-
-    # Cache for 24 hours
-    if [ "$age" -lt 86400 ]; then
-      cat "$cache_file"
-      return 0
-    fi
-  fi
-
   # Fetch latest version from GitHub
   local latest_version
   latest_version="$(fetch_latest_ruby_build_version)"
 
   if [ -n "$latest_version" ]; then
-    echo "$latest_version" >"$cache_file"
     echo "$latest_version"
     return 0
   fi
