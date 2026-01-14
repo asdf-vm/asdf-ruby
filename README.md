@@ -29,18 +29,12 @@ RUBY_APPLY_PATCHES=$(curl -s https://raw.githubusercontent.com/rvm/rvm/master/pa
 
 By default asdf-ruby automatically fetches the latest release of ruby-build, so new Ruby versions are available as soon as ruby-build supports them.
 
-You can override this behavior with the following environment variables:
+You can pin to a specific ruby-build version/branch/tag with the `ASDF_RUBY_BUILD_VERSION` environment variable:
 
-- `ASDF_RUBY_BUILD_VERSION` - Pin to a specific ruby-build version/branch/tag:
-  ```
-  ASDF_RUBY_BUILD_VERSION=v20240101 asdf install ruby 3.3.0
-  ASDF_RUBY_BUILD_VERSION=master asdf install ruby 3.3.0
-  ```
-
-- `ASDF_RUBY_BUILD_CACHE_CLEAR` - Bypass the 24-hour cache and fetch the latest version:
-  ```
-  ASDF_RUBY_BUILD_CACHE_CLEAR=1 asdf list-all ruby
-  ```
+```
+ASDF_RUBY_BUILD_VERSION=v20240101 asdf install ruby 3.3.0
+ASDF_RUBY_BUILD_VERSION=master asdf install ruby 3.3.0
+```
 
 ## Default gems
 
@@ -74,7 +68,7 @@ note that you might have to change `.ruby-version` to include full version (e.g.
 ## Troubleshooting
 
 > [!NOTE]
-> If you are not seeing a recent Ruby version, try bypassing the version cache with `ASDF_RUBY_BUILD_CACHE_CLEAR=1 asdf list-all ruby` to fetch the latest ruby-build version. If the version still doesn't appear, check ruby-build's releases at https://github.com/rbenv/ruby-build/releases to see if it's been added yet.  
+> If you are not seeing a recent Ruby version, check ruby-build's releases at https://github.com/rbenv/ruby-build/releases to see if it's been added yet.  
 
 If you are moving to asdf-ruby from another Ruby version manager, it is recommended to completely uninstall the old Ruby version manager before installing asdf-ruby.
 
