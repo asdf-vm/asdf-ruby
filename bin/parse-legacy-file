@@ -1,11 +1,16 @@
 #!/usr/bin/env bash
 
+# shellcheck source=/dev/null
+source "$(dirname "$0")/../lib/utils.sh"
+
 get_legacy_version() {
-  current_file="$1"
+  local current_file="$1"
+  local basename
   basename="$(basename -- "$current_file")"
+  local ruby_version=""
 
   if [ "$basename" == "Gemfile" ]; then
-    RUBY_VERSION="$(grep '^\s*ruby' "$current_file" |
+    ruby_version="$(grep '^\s*ruby' "$current_file" |
       sed -e 's/[[:space:]]/ /g' -e 's/#.*//' -e 's/[()]//' \
         -e 's/engine:/:engine =>/' -e 's/engine_version:/:engine_version =>/' \
         -e "s/.*:engine *=> *['\"]\([^'\"]*\).*:engine_version *=> *['\"]\([^'\"]*\).*/\2__ENGINE__\1/" \
@@ -18,11 +23,204 @@ get_legacy_version() {
     # Get version from .ruby-version file (filters out 'ruby-' prefix if it exists).
     # The .ruby-version is used by rbenv and now rvm.
     ruby_version="$(cat "$current_file")"
-    ruby_prefix="ruby-"
-    RUBY_VERSION="${ruby_version/#$ruby_prefix/}"
+    local ruby_prefix="ruby-"
+    ruby_version="${ruby_version/#$ruby_prefix/}"
   fi
 
-  echo "$RUBY_VERSION"
+  ruby_version="$(printf '%s' "$ruby_version" | tr -d '\r' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+
+  echo "$ruby_version"
 }
 
-get_legacy_version "$1"
+prefix_match() {
+  local candidate="$1"
+  local prefix="$2"
+
+  if [ -z "$prefix" ]; then
+    return 1
+  fi
+
+  if [ "$candidate" = "$prefix" ]; then
+    return 0
+  fi
+
+  local prefix_length=${#prefix}
+  if [ "${candidate:0:prefix_length}" != "$prefix" ]; then
+    return 1
+  fi
+
+  local next_char="${candidate:prefix_length:1}"
+  case "$next_char" in
+  ""|"."|"-"|"_"|"+" )
+    return 0
+    ;;
+  *)
+    return 1
+    ;;
+  esac
+}
+
+compare_versions() {
+  local left="$1"
+  local right="$2"
+  local -a left_parts=()
+  local -a right_parts=()
+  IFS='._+-' read -ra left_parts <<<"$left"
+  IFS='._+-' read -ra right_parts <<<"$right"
+  local max_len=${#left_parts[@]}
+
+  if [ ${#right_parts[@]} -gt "$max_len" ]; then
+    max_len=${#right_parts[@]}
+  fi
+
+  local i
+  for ((i = 0; i < max_len; i++)); do
+    local part_left="${left_parts[i]-}"
+    local part_right="${right_parts[i]-}"
+
+    if [ "$part_left" = "$part_right" ]; then
+      continue
+    fi
+
+    if [ -z "$part_left" ]; then
+      return 2
+    fi
+
+    if [ -z "$part_right" ]; then
+      return 1
+    fi
+
+    local left_is_num=0
+    local right_is_num=0
+    case "$part_left" in
+    ''|*[!0-9]*)
+      left_is_num=0
+      ;;
+    *)
+      left_is_num=1
+      ;;
+    esac
+
+    case "$part_right" in
+    ''|*[!0-9]*)
+      right_is_num=0
+      ;;
+    *)
+      right_is_num=1
+      ;;
+    esac
+
+    if [ "$left_is_num" -eq 1 ] && [ "$right_is_num" -eq 1 ]; then
+      if ((10#$part_left > 10#$part_right)); then
+        return 1
+      fi
+      return 2
+    fi
+
+    if [ "$left_is_num" -eq 1 ] && [ "$right_is_num" -eq 0 ]; then
+      return 1
+    fi
+
+    if [ "$left_is_num" -eq 0 ] && [ "$right_is_num" -eq 1 ]; then
+      return 2
+    fi
+
+    if [[ "$part_left" > "$part_right" ]]; then
+      return 1
+    fi
+
+    return 2
+  done
+
+  return 0
+}
+
+latest_match() {
+  local prefix="$1"
+  local best=""
+  local candidate
+
+  while IFS= read -r candidate; do
+    [ -n "$candidate" ] || continue
+    if prefix_match "$candidate" "$prefix"; then
+      if [ -z "$best" ]; then
+        best="$candidate"
+        continue
+      fi
+
+      compare_versions "$candidate" "$best"
+      case $? in
+      1)
+        best="$candidate"
+        ;;
+      esac
+    fi
+  done
+
+  if [ -n "$best" ]; then
+    echo "$best"
+  fi
+}
+
+resolve_requested_version() {
+  local requested="$1"
+  local installs_dir
+  local match
+  local definitions=""
+  local set_e_enabled=0
+  local exit_code=0
+
+  if [ "$requested" = "system" ]; then
+    echo "$requested"
+    return
+  fi
+
+  installs_dir="${ASDF_DATA_DIR:-${ASDF_DIR:-$HOME/.asdf}}/installs/ruby"
+
+  if [ -d "$installs_dir" ]; then
+    match="$(
+      for path in "$installs_dir"/*; do
+        [ -d "$path" ] || continue
+        basename "$path"
+      done | latest_match "$requested"
+    )"
+
+    if [ -n "$match" ]; then
+      echo "$match"
+      return
+    fi
+  fi
+
+  if [[ $- == *e* ]]; then
+    set_e_enabled=1
+    set +e
+  fi
+  definitions="$(ruby_build_definitions 2>/dev/null)"
+  exit_code=$?
+  if [ $set_e_enabled -eq 1 ]; then
+    set -e
+  fi
+
+  if [ $exit_code -eq 0 ] && [ -n "$definitions" ]; then
+    match="$(printf '%s\n' "$definitions" | latest_match "$requested")"
+    if [ -n "$match" ]; then
+      echo "$match"
+      return
+    fi
+  fi
+
+  echo "$requested"
+}
+
+main() {
+  local requested_version
+  requested_version="$(get_legacy_version "$1")"
+
+  if [ -z "$requested_version" ]; then
+    exit 0
+  fi
+
+  resolve_requested_version "$requested_version"
+}
+
+main "$1"

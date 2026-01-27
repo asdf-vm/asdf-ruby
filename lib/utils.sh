@@ -62,8 +62,11 @@ download_ruby_build() {
 }
 
 asdf_ruby_plugin_path() {
+  local source_path="${BASH_SOURCE[0]:-$0}"
+  local script_dir
+  script_dir="$(cd "$(dirname "$source_path")" >/dev/null 2>&1 && pwd)"
   # shellcheck disable=SC2005
-  echo "$(dirname "$(dirname "$0")")"
+  echo "$(dirname "$script_dir")"
 }
 ruby_build_dir() {
   echo "$(asdf_ruby_plugin_path)/ruby-build"
@@ -75,4 +78,9 @@ ruby_build_source_dir() {
 
 ruby_build_path() {
   echo "$(ruby_build_dir)/bin/ruby-build"
+}
+
+ruby_build_definitions() {
+  ensure_ruby_build_setup
+  "$(ruby_build_path)" --definitions | grep -v "topaz-dev"
 }
