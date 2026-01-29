@@ -24,7 +24,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Test plugin
-        uses: asdf-vm/actions/plugin-test@v3
+        uses: asdf-vm/actions/plugin-test@v4
         with:
           command: ruby -v
 
