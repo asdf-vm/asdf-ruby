@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+# This download callback is no-op because ruby-build does not provide a way to
+# download Ruby without compiling or installing it.
