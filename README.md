@@ -36,6 +36,8 @@ ASDF_RUBY_BUILD_VERSION=v20240101 asdf install ruby 3.3.0
 ASDF_RUBY_BUILD_VERSION=master asdf install ruby 3.3.0
 ```
 
+Set `ASDF_RUBY_SKIP_RUBY_BUILD_UPDATE=1` to skip the network check and reuse whatever ruby-build refs are already cached locally.
+
 ## Default gems
 
 asdf-ruby can automatically install a set of default gems right after

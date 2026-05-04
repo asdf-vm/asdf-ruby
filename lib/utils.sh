@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+RUBY_BUILD_REPOSITORY="https://github.com/rbenv/ruby-build.git"
+
 echoerr() {
   echo >&2 -e "\033[0;31m$1\033[0m"
 }
@@ -14,65 +16,98 @@ ensure_ruby_build_setup() {
 }
 
 ensure_ruby_build_installed() {
-  local current_ruby_build_version target_version
+  local source_dir target_ref
+  source_dir="$(ruby_build_source_dir)"
 
-  target_version="$(get_ruby_build_version)"
-
-  if [ ! -f "$(ruby_build_path)" ]; then
-    # No ruby-build installed - we must have a version to download
-    if [ -z "$target_version" ]; then
-      errorexit "Could not determine ruby-build version. Check your network connection."
+  if ! ensure_ruby_build_source "$source_dir"; then
+    if [ -f "$(ruby_build_path)" ]; then
+      echoerr "Warning: Could not access ruby-build source; using existing installation."
+      return 0
     fi
-    download_ruby_build "$target_version"
-  elif [ -n "$target_version" ]; then
-    # ruby-build exists and we have a target version - check if update needed
-    current_ruby_build_version="$("$(ruby_build_path)" --version | cut -d ' ' -f2)"
-    # If ruby-build version does not start with 'v',
-    # add 'v' to beginning of version
-    # shellcheck disable=SC2086
-    if [ ${current_ruby_build_version:0:1} != "v" ]; then
-      current_ruby_build_version="v$current_ruby_build_version"
-    fi
-    if [ "$current_ruby_build_version" != "$target_version" ]; then
-      # If the ruby-build directory already exists and the version does not
-      # match, remove it and download the correct version
-      rm -rf "$(ruby_build_dir)"
-      download_ruby_build "$target_version"
-    fi
+    errorexit "Failed to clone ruby-build. Check your network connection."
   fi
-  # If ruby-build exists but we couldn't get a target version, just use what's installed
+
+  target_ref="$(resolve_ruby_build_ref "$source_dir")" ||
+    errorexit "Could not determine ruby-build version."
+
+  if needs_install "$target_ref"; then
+    install_ruby_build "$source_dir" "$target_ref"
+  fi
 }
 
-download_ruby_build() {
-  local version="$1"
-  # Print to stderr so asdf doesn't assume this string is a list of versions
-  echoerr "Downloading ruby-build ${version}..."
-  # shellcheck disable=SC2155
-  local build_dir="$(ruby_build_source_dir)"
+# Maintain a persistent clone of ruby-build. Cheap `git fetch` on each install
+# keeps tag list current; set ASDF_RUBY_SKIP_RUBY_BUILD_UPDATE=1 to bypass.
+ensure_ruby_build_source() {
+  local source_dir="$1"
 
-  # Remove directory in case it still exists from last download
-  rm -rf "$build_dir"
+  if [ ! -d "$source_dir/.git" ]; then
+    echoerr "Cloning ruby-build..."
+    rm -rf "$source_dir"
+    git clone "$RUBY_BUILD_REPOSITORY" "$source_dir" >/dev/null 2>&1 || return 1
+    return 0
+  fi
 
-  # Clone down and checkout the correct ruby-build version
-  git clone https://github.com/rbenv/ruby-build.git "$build_dir" >/dev/null 2>&1
-  (
-    cd "$build_dir" || exit
-    git checkout "$version" >/dev/null 2>&1
-  )
+  if [ -n "${ASDF_RUBY_SKIP_RUBY_BUILD_UPDATE:-}" ]; then
+    return 0
+  fi
 
-  # Install in the ruby-build dir (must use absolute path as install.sh changes directory)
+  git -C "$source_dir" fetch --tags --prune origin >/dev/null 2>&1 ||
+    echoerr "Warning: Could not update ruby-build, using cached refs."
+  return 0
+}
+
+# Pick the ref to check out: explicit env var > latest release tag.
+resolve_ruby_build_ref() {
+  local source_dir="$1"
+
+  if [ -n "${ASDF_RUBY_BUILD_VERSION:-}" ]; then
+    echo "$ASDF_RUBY_BUILD_VERSION"
+    return 0
+  fi
+
+  local latest
+  latest="$(git -C "$source_dir" tag --list 'v*' --sort=-v:refname | head -1)"
+  if [ -n "$latest" ]; then
+    echo "$latest"
+    return 0
+  fi
+  return 1
+}
+
+needs_install() {
+  local target_ref="$1" installed_version
+  [ ! -f "$(ruby_build_path)" ] && return 0
+
+  installed_version="$("$(ruby_build_path)" --version | cut -d ' ' -f2)"
+  if [ "${installed_version:0:1}" != "v" ]; then
+    installed_version="v$installed_version"
+  fi
+  [ "$installed_version" != "$target_ref" ]
+}
+
+install_ruby_build() {
+  local source_dir="$1" ref="$2"
+  echoerr "Installing ruby-build ${ref}..."
+
+  local checkout_ref="$ref"
+  if git -C "$source_dir" show-ref --verify --quiet "refs/remotes/origin/$ref"; then
+    checkout_ref="origin/$ref"
+  fi
+  git -C "$source_dir" checkout --detach "$checkout_ref" >/dev/null 2>&1 ||
+    errorexit "Failed to checkout ruby-build ref ${ref}."
+
+  rm -rf "$(ruby_build_dir)"
   local install_dir
   install_dir="$(cd "$(asdf_ruby_plugin_path)" && pwd)/ruby-build"
-  PREFIX="$install_dir" "$build_dir/install.sh"
-
-  # Remove ruby-build source dir
-  rm -rf "$build_dir"
+  PREFIX="$install_dir" "$source_dir/install.sh" ||
+    errorexit "Failed to install ruby-build."
 }
 
 asdf_ruby_plugin_path() {
   # shellcheck disable=SC2005
   echo "$(dirname "$(dirname "$0")")"
 }
+
 ruby_build_dir() {
   echo "$(asdf_ruby_plugin_path)/ruby-build"
 }
@@ -83,47 +118,4 @@ ruby_build_source_dir() {
 
 ruby_build_path() {
   echo "$(ruby_build_dir)/bin/ruby-build"
-}
-
-# Fetch the latest ruby-build version tag from GitHub
-fetch_latest_ruby_build_version() {
-  git ls-remote --tags --sort=-version:refname https://github.com/rbenv/ruby-build.git 2>/dev/null |
-    grep -oE 'refs/tags/v[0-9]+$' |
-    head -1 |
-    sed 's|refs/tags/||'
-}
-
-# Get the ruby-build version to use
-# Priority: ASDF_RUBY_BUILD_VERSION env var > fetched latest > installed version
-get_ruby_build_version() {
-  # If user explicitly set a version, use that
-  if [ -n "${ASDF_RUBY_BUILD_VERSION:-}" ]; then
-    echo "$ASDF_RUBY_BUILD_VERSION"
-    return 0
-  fi
-
-  # Fetch latest version from GitHub
-  local latest_version
-  latest_version="$(fetch_latest_ruby_build_version)"
-
-  if [ -n "$latest_version" ]; then
-    echo "$latest_version"
-    return 0
-  fi
-
-  # Fallback: if ruby-build is already installed, use its version
-  # (if we can't reach GitHub, we likely can't download a new version anyway)
-  if [ -f "$(ruby_build_path)" ]; then
-    local installed_version
-    installed_version="$("$(ruby_build_path)" --version | cut -d ' ' -f2)"
-    if [ "${installed_version:0:1}" != "v" ]; then
-      installed_version="v$installed_version"
-    fi
-    echoerr "Warning: Could not fetch latest ruby-build version, using installed version ${installed_version}"
-    echo "$installed_version"
-    return 0
-  fi
-
-  # No version available
-  return 1
 }
