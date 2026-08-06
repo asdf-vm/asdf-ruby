@@ -76,3 +76,18 @@ ruby_build_source_dir() {
 ruby_build_path() {
   echo "$(ruby_build_dir)/bin/ruby-build"
 }
+
+# Prevent ASDF from repeatedly invoking itself (e.g. via bin/exec-env)
+# until the host machine runs out of memory
+ruby_bypassing_asdf_callbacks() {
+  "$ASDF_INSTALL_PATH/bin/ruby" "$@"
+}
+
+ruby_minor_version() {
+  ruby_bypassing_asdf_callbacks -e 'puts RbConfig::CONFIG["ruby_version"]'
+}
+
+gem_user_dir() {
+  ruby_bypassing_asdf_callbacks -rrubygems -e 'puts Gem.user_dir'
+}
+
