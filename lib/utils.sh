@@ -48,7 +48,11 @@ download_ruby_build() {
   rm -rf "$build_dir"
 
   # Clone down and checkout the correct ruby-build version
-  git clone https://github.com/rbenv/ruby-build.git "$build_dir" >/dev/null 2>&1
+  local git_error
+  git_error=$(git clone https://github.com/rbenv/ruby-build.git "$build_dir" 2>&1) || {
+    rm -rf "$build_dir"
+    errorexit "Failed to download ruby-build: $git_error\nPlease check your internet connection."
+  }
   (
     cd "$build_dir" || exit
     git checkout "$RUBY_BUILD_TAG" >/dev/null 2>&1
