@@ -81,10 +81,48 @@ get_absolute_path() {
   )
 }
 
+gem_command() {
+  "${ASDF_INSTALL_PATH}/bin/gem" "$@"
+}
+
+# Before Ruby 2.6 Bundler was not installed by default
+ensure_bundler_installed() {
+  echo -n "Checking: Bundler is ... "
+
+  if gem_command list -i bundler >/dev/null 2>&1; then
+    echo "INSTALLED"
+    return 0
+  else
+    echo "MISSING"
+  fi
+
+  if semantic_version_lt "$ASDF_INSTALL_VERSION" "1.9"; then
+    echo "Skipping installation of Bundler because requested Ruby version is prior to 1.9"
+    return 0
+  fi
+
+  # Version 1.17.3 is compatible with all Ruby versions 1.9 and above.
+  # This will ensure that some version of Bundler is installed and shimmed.
+  install_ruby_gem bundler --version 1.17.3
+}
+
+install_ruby_gem() {
+  local gem_name=$1
+  local args=("${@:2}")
+
+  # shellcheck disable=SC2145
+  echo -n "Running: gem install $gem_name ${args[@]:-} ... "
+
+  if output=$(gem_command install "$gem_name" "${args[@]+"${args[@]}"}" 2>&1); then
+    echo -e "SUCCESS"
+  else
+    echo -e "FAIL: $output"
+  fi
+}
+
 install_default_gems() {
   local args=()
   local default_gems="${ASDF_GEM_DEFAULT_PACKAGES_FILE:=$HOME/.default-gems}"
-  local gem="${ASDF_INSTALL_PATH}/bin/gem"
 
   if [ ! -f "$default_gems" ]; then
     return
@@ -114,15 +152,9 @@ install_default_gems() {
       args=()
     fi
 
-    # shellcheck disable=SC2145
-    echo -n "Running: gem install $gem_name ${args[@]:-} ... "
+    install_ruby_gem "$gem_name" "${args[@]}"
 
-    if output=$("$gem" install "$gem_name" "${args[@]+"${args[@]}"}" 2>&1); then
-      echo -e "SUCCESS"
-    else
-      echo -e "FAIL: $output"
-    fi
-    # echo here adds trailing newline, which is necessary if file lacks one,
+    # echo (inside install_ruby_gem) adds trailing newline, which is necessary if file lacks one,
     # empty lines are already skipped some multiple trailing newlines are not a problem.
   done < <(
     cat "$default_gems"
@@ -131,4 +163,5 @@ install_default_gems() {
 }
 
 install_ruby "$ASDF_INSTALL_TYPE" "$ASDF_INSTALL_VERSION" "$ASDF_INSTALL_PATH"
+ensure_bundler_installed
 install_default_gems

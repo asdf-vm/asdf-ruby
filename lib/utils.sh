@@ -76,3 +76,35 @@ ruby_build_source_dir() {
 ruby_build_path() {
   echo "$(ruby_build_dir)/bin/ruby-build"
 }
+
+# Compare semantic version numbers
+# Success if first argument is lower than second argument
+semantic_version_lt() {
+    local IFS=.
+    local -a v1 v2
+    local i
+
+    read -ra v1 <<< "$1"
+    read -ra v2 <<< "$2"
+
+    # Pad shorter version with zeros
+    for ((i=${#v1[@]}; i<${#v2[@]}; i++)); do
+        v1[i]=0
+    done
+    for ((i=${#v2[@]}; i<${#v1[@]}; i++)); do
+        v2[i]=0
+    done
+
+    # Compare each numeric part
+    for ((i=0; i<${#v1[@]}; i++)); do
+        # Force base-10 interpretation so values like 08 are not treated as invalid octal numbers
+        if ((10#${v1[i]} < 10#${v2[i]})); then
+            return 0
+        fi
+        if ((10#${v1[i]} > 10#${v2[i]})); then
+            return 1
+        fi
+    done
+
+    return 1
+}
