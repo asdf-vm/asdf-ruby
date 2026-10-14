@@ -4,6 +4,8 @@ set -euo pipefail
 
 # shellcheck source=/dev/null
 source "$(dirname "$0")/../lib/utils.sh"
+# shellcheck source=/dev/null
+source "$(dirname "$0")/../lib/precompiled.sh"
 
 install_ruby() {
   ensure_ruby_build_setup
@@ -130,5 +132,16 @@ install_default_gems() {
   )
 }
 
-install_ruby "$ASDF_INSTALL_TYPE" "$ASDF_INSTALL_VERSION" "$ASDF_INSTALL_PATH"
+should_compile_from_source() {
+  local val="${ASDF_RUBY_COMPILE_FROM_SOURCE:-}"
+  [[ "$val" == "1" || "$val" == "true" || "$val" == "yes" ]]
+}
+
+if should_compile_from_source || [ "$ASDF_INSTALL_TYPE" != "version" ]; then
+  install_ruby "$ASDF_INSTALL_TYPE" "$ASDF_INSTALL_VERSION" "$ASDF_INSTALL_PATH"
+elif ! install_precompiled "$ASDF_INSTALL_VERSION" "$ASDF_INSTALL_PATH"; then
+  echoerr "Falling back to building Ruby from source..."
+  install_ruby "$ASDF_INSTALL_TYPE" "$ASDF_INSTALL_VERSION" "$ASDF_INSTALL_PATH"
+fi
+
 install_default_gems
