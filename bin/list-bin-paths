@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 
-gem_version="${ASDF_INSTALL_VERSION%.*}.0"
-echo "bin lib/ruby/gems/$gem_version/bin"
+# shellcheck source=/dev/null
+source "$(dirname "$0")/../lib/utils.sh"
+
+echo "bin lib/ruby/gems/$(ruby_minor_version)/bin"

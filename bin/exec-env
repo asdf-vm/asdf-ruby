@@ -3,9 +3,15 @@
 current_script_path="${BASH_SOURCE[0]}"
 ruby_plugin_dir="$(dirname "$(dirname "$current_script_path")")"
 
+source "$ruby_plugin_dir/lib/utils.sh"
+
 RUBYLIB=${RUBYLIB:-}
 if [ "$RUBYLIB" = "" ]; then
   export RUBYLIB="$ruby_plugin_dir/rubygems-plugin"
 else
   export RUBYLIB="$ruby_plugin_dir/rubygems-plugin:$RUBYLIB"
+fi
+
+if output=$(gem_user_dir); then
+  export GEM_HOME="$output"
 fi
